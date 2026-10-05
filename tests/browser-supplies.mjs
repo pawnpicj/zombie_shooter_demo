@@ -1,5 +1,6 @@
 import {createRequire} from 'node:module';
 import assert from 'node:assert/strict';
+import {idleSearchWaypoint} from './enemy-search.mjs';
 const require=createRequire(import.meta.url),puppeteer=require(process.env.PUPPETEER_MODULE||'puppeteer');
 const browser=await puppeteer.launch({headless:true,executablePath:process.env.CHROME_PATH,args:['--use-angle=swiftshader','--enable-unsafe-swiftshader'],defaultViewport:{width:1200,height:800}});
 const page=await browser.newPage(),errors=[];page.on('pageerror',e=>errors.push(e.message));
@@ -8,7 +9,7 @@ async function keys(wanted){for(const k of held)if(!wanted.includes(k)){await pa
 async function aim(){const d=await read();assert.notEqual(d.state,'dead');const t=d.targets.sort((a,b)=>a.distance-b.distance)[0];if(t)await page.mouse.move(t.x,t.y);return d;}
 async function walk(x,z,tolerance=.9){const end=Date.now()+40000;while(Date.now()<end){const d=await aim(),dx=x-d.player.x,dz=z-d.player.z;if(Math.abs(dx)<tolerance&&Math.abs(dz)<tolerance){await keys([]);await sleep(120);const stopped=await read();if(Math.hypot(x-stopped.player.x,z-stopped.player.z)<1.8)return;continue;}const wanted=[];if(Math.abs(dx)>=tolerance)wanted.push(dx>0?'d':'a');if(Math.abs(dz)>=tolerance)wanted.push(dz>0?'s':'w');await keys(wanted);await sleep(60);}throw Error('Waypoint '+x+','+z+' '+JSON.stringify(await read()));}
 async function collect(x,z){await walk(x,z);await page.keyboard.press('e');}
-async function clearWave(){await page.mouse.up();await page.mouse.move(600,400);await page.mouse.down();const end=Date.now()+100000;while(Date.now()<end){const d=await aim();if(d.campaign.phase==='objective'){await page.mouse.up();return d;}await sleep(60);}throw Error('Wave did not clear '+JSON.stringify(await read()));}
+async function clearWave(){await page.mouse.up();await page.mouse.move(600,400);await page.mouse.down();const end=Date.now()+100000;while(Date.now()<end){const d=await aim();if(d.campaign.phase==='objective'){await page.mouse.up();return d;}const waypoint=idleSearchWaypoint(d);if(waypoint)await walk(waypoint.x,waypoint.z);await sleep(60);}throw Error('Wave did not clear '+JSON.stringify(await read()));}
 async function shop(){
  await page.keyboard.press('b');assert.equal((await read()).state,'shop');
  const freeze=await read();await sleep(300);assert.deepEqual(await read(),freeze);
@@ -36,7 +37,9 @@ try{
  await buyNamed('ขวดเพลิง');assert.equal((await read()).inventory.grenades.molotov,1);
  await page.screenshot({path:'artifacts/armory-shop.png'});await leaveShop();await throwType('molotov');
  await collect(-18,0);assert.ok((await read()).inventory.weapons.includes('smg'));assert.equal((await read()).inventory.equipped,'smg');
- await page.keyboard.press('f');assert.equal((await read()).inventory.equipped,'m4');
+ await page.keyboard.press('f');assert.equal((await read()).inventory.equipped,'smg');
+ assert.equal((await read()).inventory.loadout.primary,'smg');assert.ok((await read()).inventory.weapons.includes('m4'));
+ await shop();await page.click('#weaponRows .shop-row:first-child .equip');await leaveShop();assert.equal((await read()).inventory.equipped,'m4');
  await walk(-18,-15);await walk(-16,-15,1.4);await page.keyboard.press('e');assert.equal((await read()).state,'dialogue');
  await page.click('#start');await page.mouse.down();await walk(-18,-15);await walk(-18,0);await walk(0,0);
  await clearWave();assert.equal((await read()).inventory.crates.some(c=>c.weapon==="smg"),false,"Found weapons should not respawn next chapter");console.log("Supply checkpoint: wave 2 cleared, Lab SMG collected");

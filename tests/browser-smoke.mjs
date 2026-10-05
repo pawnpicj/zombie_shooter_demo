@@ -24,6 +24,7 @@ try {
   assert.equal((await page.evaluate(()=>window.zombieShooter)).ammo,30,'Reload should refill');
   await page.keyboard.press('Escape');
   const paused=await page.evaluate(()=>window.zombieShooter);
+  assert.equal(await page.$eval('#screeningPreview',el=>el.hidden),true,'Map preview is offered before a run, not during paused progress');
   await sleep(700);
   assert.deepEqual(await page.evaluate(()=>window.zombieShooter),paused,'Pause should freeze gameplay');
   await page.keyboard.press('Escape');

@@ -1,0 +1,384 @@
+{
+  "generator": "tools/generate-audio.mjs",
+  "license": "Original procedural audio generated in this project",
+  "files": [
+    {
+      "file": "sounds/weapons/m4/fire_0.wav",
+      "sha256": "cfbae7b9355340afbf25b021a1c2eaec7b95bbc597cdf7e781a6402e9389707f",
+      "sampleRate": 24000,
+      "frames": 4320
+    },
+    {
+      "file": "sounds/weapons/m4/fire_1.wav",
+      "sha256": "bc9038f5ff62bc8b199e8431907f39c5e036fda1600aee9a43f45d315e8f702d",
+      "sampleRate": 24000,
+      "frames": 4320
+    },
+    {
+      "file": "sounds/weapons/m4/fire_2.wav",
+      "sha256": "ea0bf4d7f2913cee2b901030f183b284b0b66e2c134058cc541c70aeeb63b78b",
+      "sampleRate": 24000,
+      "frames": 4320
+    },
+    {
+      "file": "sounds/weapons/m4/fire_3.wav",
+      "sha256": "3dad153037ad0a01c4fcca6ff0df4018d298e3291bb55696f996502090f1ad1c",
+      "sampleRate": 24000,
+      "frames": 4320
+    },
+    {
+      "file": "sounds/weapons/m4/reload_out.wav",
+      "sha256": "ef26163abe4df26e08ee1bd8c137176f9a0366f71f8488783d9330491c7301a1",
+      "sampleRate": 24000,
+      "frames": 3120
+    },
+    {
+      "file": "sounds/weapons/m4/reload_in.wav",
+      "sha256": "fb5434a8a74e868328f0a185c046157653fee33f82ba624d1bfecebb143212b4",
+      "sampleRate": 24000,
+      "frames": 3120
+    },
+    {
+      "file": "sounds/weapons/m4/reload_slide.wav",
+      "sha256": "376cd235a529b00934704db347a3ff016fe93308df744b795ab6f54943fa2c2d",
+      "sampleRate": 24000,
+      "frames": 3120
+    },
+    {
+      "file": "sounds/weapons/m4/dry.wav",
+      "sha256": "3cb4f55506d2eb275db59dfbb9aa7fa42c32c65998aa1f978c06e28985ef0eb7",
+      "sampleRate": 24000,
+      "frames": 2160
+    },
+    {
+      "file": "sounds/weapons/m4/equip.wav",
+      "sha256": "7148ab3d47215dc73a562130cd310e6ef4daa6e348fd3b086707125a5104d211",
+      "sampleRate": 24000,
+      "frames": 2160
+    },
+    {
+      "file": "sounds/weapons/smg/fire_0.wav",
+      "sha256": "9327fe4f720007a70eb2f1678376fa0e55aea0b1bfbbdd8dc0be0d141579d5d2",
+      "sampleRate": 24000,
+      "frames": 4320
+    },
+    {
+      "file": "sounds/weapons/smg/fire_1.wav",
+      "sha256": "8497f0068cd3bd790b8da5acde66550eec4bcd80beb7d6e7ceffde9734a1d3e8",
+      "sampleRate": 24000,
+      "frames": 4320
+    },
+    {
+      "file": "sounds/weapons/smg/fire_2.wav",
+      "sha256": "5271abf570f7af482ac9cf348fbb5ade7a6dc5875954fccafb4ce9445053e535",
+      "sampleRate": 24000,
+      "frames": 4320
+    },
+    {
+      "file": "sounds/weapons/smg/fire_3.wav",
+      "sha256": "a4e42d2a6674040f06ca26cbe3a180dd14470c6dccd5c001ddfa9b883cee5bdc",
+      "sampleRate": 24000,
+      "frames": 4320
+    },
+    {
+      "file": "sounds/weapons/smg/reload_out.wav",
+      "sha256": "3a2fdf2ac7f1ff0c18c29cb154a0891154e790c0b171ae5cf5e65829e4c02ddd",
+      "sampleRate": 24000,
+      "frames": 3120
+    },
+    {
+      "file": "sounds/weapons/smg/reload_in.wav",
+      "sha256": "f3d3fc8bf166689d49f9458351c9bdefe2c5acc1a000c6f567ee43de304840c2",
+      "sampleRate": 24000,
+      "frames": 3120
+    },
+    {
+      "file": "sounds/weapons/smg/reload_slide.wav",
+      "sha256": "1b9c6d012c4e3345547485d37da16cbfc477af2171fce44e08709555c3e277ae",
+      "sampleRate": 24000,
+      "frames": 3120
+    },
+    {
+      "file": "sounds/weapons/smg/dry.wav",
+      "sha256": "c88a3085f67d6f02b343b134bc0737845374f6fc079a2804650a35b644b40b25",
+      "sampleRate": 24000,
+      "frames": 2160
+    },
+    {
+      "file": "sounds/weapons/smg/equip.wav",
+      "sha256": "5e05c7ad8ece046d3027a9ddbec18101e1de8212c7462908a621a1bf01bb9cd8",
+      "sampleRate": 24000,
+      "frames": 2160
+    },
+    {
+      "file": "sounds/weapons/shotgun/fire_0.wav",
+      "sha256": "6f1645a7a4aa2ce1c5d53283588ef52dc5759a6aae376774c1f0983f07b0c5ab",
+      "sampleRate": 24000,
+      "frames": 4320
+    },
+    {
+      "file": "sounds/weapons/shotgun/fire_1.wav",
+      "sha256": "f959d68d01468ed6072a6ee255057393983dcc258815afdeb0c075e03a35f983",
+      "sampleRate": 24000,
+      "frames": 4320
+    },
+    {
+      "file": "sounds/weapons/shotgun/fire_2.wav",
+      "sha256": "dcfe83a20ddcc1c36e8c3b0d70c4edfb402a35cc49a9159043fbedf6008a54f6",
+      "sampleRate": 24000,
+      "frames": 4320
+    },
+    {
+      "file": "sounds/weapons/shotgun/fire_3.wav",
+      "sha256": "6170138b078a49f42bd5da3f4608a72fa83ca961a0c260c52696c10b7e6c124b",
+      "sampleRate": 24000,
+      "frames": 4320
+    },
+    {
+      "file": "sounds/weapons/shotgun/reload_out.wav",
+      "sha256": "0e5bf6f8479dcf627b4ec43d46d83b02baf05cae617d44bf6c7e92b4267bd0c0",
+      "sampleRate": 24000,
+      "frames": 3120
+    },
+    {
+      "file": "sounds/weapons/shotgun/reload_in.wav",
+      "sha256": "923e7b0d680037e019652fd454dfe7f78adcb522efc5b1e5b1304ecb58cc0a80",
+      "sampleRate": 24000,
+      "frames": 3120
+    },
+    {
+      "file": "sounds/weapons/shotgun/reload_slide.wav",
+      "sha256": "54ad9e9fffa2a8f5b02e66fb5a94b53852d5412a2a7d40deca72662e7adb9ef5",
+      "sampleRate": 24000,
+      "frames": 3120
+    },
+    {
+      "file": "sounds/weapons/shotgun/dry.wav",
+      "sha256": "cd469aa951cd8eba8ecd273c9a213895e0bd012cdf1394c5c978c59b93f9496d",
+      "sampleRate": 24000,
+      "frames": 2160
+    },
+    {
+      "file": "sounds/weapons/shotgun/equip.wav",
+      "sha256": "2dfc345866b6a25605fbb4eba6d4eba7a397a7e024b6c574ec03591e427f909a",
+      "sampleRate": 24000,
+      "frames": 2160
+    },
+    {
+      "file": "sounds/weapons/marksman/fire_0.wav",
+      "sha256": "ed53fd55dc0332e5e9810bd397d9f696daa91b3a4e69b05fa555c4e2efab41b8",
+      "sampleRate": 24000,
+      "frames": 4320
+    },
+    {
+      "file": "sounds/weapons/marksman/fire_1.wav",
+      "sha256": "6ec52e80c6bc5ae85aacd2019f11745f6069adf9ee476a8f067baa8a11b4ef95",
+      "sampleRate": 24000,
+      "frames": 4320
+    },
+    {
+      "file": "sounds/weapons/marksman/fire_2.wav",
+      "sha256": "78ed6094bf4792d084697d17cbef064481f7b959ec4b847c48a2d36fd7b8c9a0",
+      "sampleRate": 24000,
+      "frames": 4320
+    },
+    {
+      "file": "sounds/weapons/marksman/fire_3.wav",
+      "sha256": "12a109e91074b85ecea7c4e26d9781b0e3f30f51c24512bfe268c212015e7468",
+      "sampleRate": 24000,
+      "frames": 4320
+    },
+    {
+      "file": "sounds/weapons/marksman/reload_out.wav",
+      "sha256": "450a446f487d17d09eb24e5e56f5b6e745e711ccccf34734ada418e900221408",
+      "sampleRate": 24000,
+      "frames": 3120
+    },
+    {
+      "file": "sounds/weapons/marksman/reload_in.wav",
+      "sha256": "9f117a1814bd8d2954bd20d045bd420d83f72bb00325b0a0f5054a26cccf33a6",
+      "sampleRate": 24000,
+      "frames": 3120
+    },
+    {
+      "file": "sounds/weapons/marksman/reload_slide.wav",
+      "sha256": "1f00d953a7f5165cb8f70c3a33d3cc596923f26392d7b401a7f7b9f7b175087a",
+      "sampleRate": 24000,
+      "frames": 3120
+    },
+    {
+      "file": "sounds/weapons/marksman/dry.wav",
+      "sha256": "f9fa97a106a9504170e61704f75106f59caeb34052bfc7a3ca2acedcb6645794",
+      "sampleRate": 24000,
+      "frames": 2160
+    },
+    {
+      "file": "sounds/weapons/marksman/equip.wav",
+      "sha256": "b8febfa90667966c5b63e7c89bbfffec3910e4b2ec86673152c06c9259923268",
+      "sampleRate": 24000,
+      "frames": 2160
+    },
+    {
+      "file": "sounds/weapons/vx9/fire_0.wav",
+      "sha256": "9937380a887c04d7fcc83ecde8b2505be80edd2ddd49ef54a91b05854aa35c32",
+      "sampleRate": 24000,
+      "frames": 4320
+    },
+    {
+      "file": "sounds/weapons/vx9/fire_1.wav",
+      "sha256": "457e145210caee9ecbc0dcc9e223f0d7dcb98eefd88176cdb024746abfb0988b",
+      "sampleRate": 24000,
+      "frames": 4320
+    },
+    {
+      "file": "sounds/weapons/vx9/fire_2.wav",
+      "sha256": "cae3844b22d7263753c0ce9a56ab7acacd7aa71e0679bc08eb8719e781e20a4d",
+      "sampleRate": 24000,
+      "frames": 4320
+    },
+    {
+      "file": "sounds/weapons/vx9/fire_3.wav",
+      "sha256": "0a41e2ab65c851e9bd09dfd515d1a27471c39e1773f068f60fcba602fb273d87",
+      "sampleRate": 24000,
+      "frames": 4320
+    },
+    {
+      "file": "sounds/weapons/vx9/reload_out.wav",
+      "sha256": "6cd150b52d4ef38dd0167b3befb6d27a83e9570d96610ee40b27257d53cec400",
+      "sampleRate": 24000,
+      "frames": 3120
+    },
+    {
+      "file": "sounds/weapons/vx9/reload_in.wav",
+      "sha256": "bd5f218830987ec3bc1468e7f378d62f771f5f70da6ff774af6d6aea84b8c0f3",
+      "sampleRate": 24000,
+      "frames": 3120
+    },
+    {
+      "file": "sounds/weapons/vx9/reload_slide.wav",
+      "sha256": "348d14805072d7438d3832fb12ee23142c44d73e330041e24a42af8eb738b837",
+      "sampleRate": 24000,
+      "frames": 3120
+    },
+    {
+      "file": "sounds/weapons/vx9/dry.wav",
+      "sha256": "3d1295b50b891936b0d8b0321ae5cc7ed2d80aeee988ab4cd73ba7c2a8089e88",
+      "sampleRate": 24000,
+      "frames": 2160
+    },
+    {
+      "file": "sounds/weapons/vx9/equip.wav",
+      "sha256": "7d8b36462fefca84f0fcc823811960bd8638d0bd9d0cb89e0ace7ff4a2c63a58",
+      "sampleRate": 24000,
+      "frames": 2160
+    },
+    {
+      "file": "sounds/weapons/m4x/fire_0.wav",
+      "sha256": "b563ffa99e1c2680e117e8e3b0d7aca131a31539ac8a4f6ba774e711db907291",
+      "sampleRate": 24000,
+      "frames": 4320
+    },
+    {
+      "file": "sounds/weapons/m4x/fire_1.wav",
+      "sha256": "5d662104ddb635548b43f321d710e4e0cb1543498e406269e20383125da813d7",
+      "sampleRate": 24000,
+      "frames": 4320
+    },
+    {
+      "file": "sounds/weapons/m4x/fire_2.wav",
+      "sha256": "410f0f85fc434f0af9ef643eddc3403f78030029b14f679c22948f5800318ffa",
+      "sampleRate": 24000,
+      "frames": 4320
+    },
+    {
+      "file": "sounds/weapons/m4x/fire_3.wav",
+      "sha256": "5ed990a65e0895318f8182981db1e9a3981104b2a64838b47a86f7697fa52dcc",
+      "sampleRate": 24000,
+      "frames": 4320
+    },
+    {
+      "file": "sounds/weapons/m4x/reload_out.wav",
+      "sha256": "d8c61fea8f4afb1e93a5199f3b2994073a61b08ff8f2c5271610ef98e3129294",
+      "sampleRate": 24000,
+      "frames": 3120
+    },
+    {
+      "file": "sounds/weapons/m4x/reload_in.wav",
+      "sha256": "9ac051c00851b52beb6d896f726481585ed43d8f9f11322ddb26ff904db2ae55",
+      "sampleRate": 24000,
+      "frames": 3120
+    },
+    {
+      "file": "sounds/weapons/m4x/reload_slide.wav",
+      "sha256": "adcce8052cf11cd6057a600673ac4b608dcf67d3fa884e59eb5c48300491516b",
+      "sampleRate": 24000,
+      "frames": 3120
+    },
+    {
+      "file": "sounds/weapons/m4x/dry.wav",
+      "sha256": "1bb90bef346bdb53731b330a5f4078f008d50faf993f953ac9fbd289eb5971f5",
+      "sampleRate": 24000,
+      "frames": 2160
+    },
+    {
+      "file": "sounds/weapons/m4x/equip.wav",
+      "sha256": "6675e814f45fc119ab9021f5623bb0ad74df96dae09cd4ceccf2ef1d63645ab8",
+      "sampleRate": 24000,
+      "frames": 2160
+    },
+    {
+      "file": "sounds/weapons/sg12/fire_0.wav",
+      "sha256": "c316bbfa7cf92818e0d0b0f5197c275eb4dd73ba906d8602306dce5eda5e7d64",
+      "sampleRate": 24000,
+      "frames": 11520
+    },
+    {
+      "file": "sounds/weapons/sg12/fire_1.wav",
+      "sha256": "913222bda1dd5e08bce9c1e2a31affe883b54b0aa6bd7f9307d7219d350e45db",
+      "sampleRate": 24000,
+      "frames": 11520
+    },
+    {
+      "file": "sounds/weapons/sg12/fire_2.wav",
+      "sha256": "6e79734d136da0fc51eb2994d4a5ca5f70bff570440e67c31751c695b0d784cf",
+      "sampleRate": 24000,
+      "frames": 11520
+    },
+    {
+      "file": "sounds/weapons/sg12/fire_3.wav",
+      "sha256": "96403c18ef2f1fed7c92fe9bb0a0c046dc3dedeb14a7dfe4db3c722c9cf98758",
+      "sampleRate": 24000,
+      "frames": 11520
+    },
+    {
+      "file": "sounds/weapons/sg12/reload_out.wav",
+      "sha256": "47aca3d5eed3e44c074b1a388af4ff14c643207e8bfbdc9df05bbb088c2e87be",
+      "sampleRate": 24000,
+      "frames": 3120
+    },
+    {
+      "file": "sounds/weapons/sg12/reload_in.wav",
+      "sha256": "ba7143b471a09cfde8efdd2c3ad98a76fa9243ba33be646f05a836ace33ac4a1",
+      "sampleRate": 24000,
+      "frames": 3120
+    },
+    {
+      "file": "sounds/weapons/sg12/reload_slide.wav",
+      "sha256": "69b38a2b6c0b8a6813aadc0ef1a7aef9625361c4d1a02de4f418102995d08a97",
+      "sampleRate": 24000,
+      "frames": 3120
+    },
+    {
+      "file": "sounds/weapons/sg12/dry.wav",
+      "sha256": "926988dae0d18ee924f76cddbd5da8707079c85064a7534f922356fed7d4d914",
+      "sampleRate": 24000,
+      "frames": 2880
+    },
+    {
+      "file": "sounds/weapons/sg12/equip.wav",
+      "sha256": "7b3746fcdbb2f5527794dd184e4a7cc6f0e30d2d4c620970010d286037cf2e5c",
+      "sampleRate": 24000,
+      "frames": 3840
+    }
+  ]
+}

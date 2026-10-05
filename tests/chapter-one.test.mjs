@@ -1,0 +1,22 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {standaloneTransfer,hydrateTransfer,validateTransfer,createTransfer} from '../chapter-transfer.mjs';
+import {chapterLoadout} from '../weapons.mjs';
+import {createChapterOne,interactChapterOne,clearLockdown,openCityGate,crossCityGate} from '../chapter-one.mjs';
+import {chapterOneMap} from '../maps/chapter-one.mjs';
+import {createChapterEncounter} from '../chapter-encounter.mjs';
+import {compileMap} from '../block-map.mjs';
+import {SCREENING_CENTER} from '../maps/screening-center.mjs';
+test('Chapter transition preserves earned inventory and progression',()=>{
+ const p=standaloneTransfer();p.source='chapter0';p.evidence=['security-log','formula-x','extracted'];Object.assign(p.inventory,{money:391,materials:27,shieldCells:2,speedPotions:3});p.inventory.magazines.m4=7;p.inventory.reserves.rifle=93;p.inventory.upgrades.m4=2;p.inventory.grenades.cluster=1;p.progression.points=3;p.progression.ranks.powerAttack=2;
+ const entry=hydrateTransfer(createTransfer({state:'won',campaign:{complete:true,evidence:p.evidence},...p}));chapterLoadout(entry.bag,1);
+ assert.equal(entry.bag.money,391);assert.equal(entry.bag.materials,27);assert.equal(entry.bag.magazines.m4,7);assert.equal(entry.bag.reserves.rifle,93);assert.equal(entry.bag.grenades.cluster,1);assert.deepEqual(entry.progression,p.progression);
+});
+test('Chapter transfer rejects unfinished, forged and invalid values',()=>{
+ assert.throws(()=>createTransfer({state:'playing'}));for(const change of [p=>p.hp=0,p=>p.inventory.money=-1,p=>p.inventory.magazines.m4=900,p=>p.source='chapter0']){const p=standaloneTransfer();change(p);assert.throws(()=>validateTransfer(p));}
+});
+test('Silent Checkpoint cannot be skipped or claimed twice',()=>{const p=createChapterOne();assert.equal(interactChapterOne(p,'observation'),false);assert.equal(interactChapterOne(p,'screening-record'),true);assert.equal(p.mission,1);assert.equal(interactChapterOne(p,'screening-record'),false);assert.deepEqual(p.evidence,['screening-failure']);});
+test('Lockdown requires the entire encounter and a second physical control interaction',()=>{const p=createChapterOne();for(const id of ['screening-record','observation','control-status'])assert.equal(interactChapterOne(p,id),true);assert.equal(p.phase,'blackout');assert.equal(interactChapterOne(p,'control-status'),false);p.phase='combat';p.spawned=17;assert.equal(clearLockdown(p,0),false);p.spawned=18;assert.equal(clearLockdown(p,1),false);assert.equal(clearLockdown(p,0),true);assert.equal(interactChapterOne(p,'control-status'),true);assert.equal(p.mission,3);assert.deepEqual(p.evidence,['screening-failure','patient-34','black-7']);});
+test('Chapter encounter navigates authored doors and rewards deaths once',()=>{const map=compileMap(SCREENING_CENTER);for(const d of map.doors)map.setDoorOpen(d.id,true);let rewards=0,attacks=0;const encounter=createChapterEncounter({map,obstacles:map.obstacles,player:{x:12,z:72},onKill:()=>rewards++,onAttack:()=>attacks++,onSpawn(){},onDoor:id=>map.setDoorOpen(id,true)});encounter.start([{x:18,z:66}],1,'lockdown');for(let i=0;i<900;i++)encounter.tick(1/60);assert.equal(encounter.remaining,0);assert.ok(attacks>0);const e=encounter.enemies[0];e.onHit(999,{x:12,z:72});e.onHit(999,{x:12,z:72});assert.equal(rewards,1);assert.equal(e.brain.state,'dead');});
+test('Doge City requires mission completion and physical crossing, optional bus is not required',()=>{const p=createChapterOne();assert.equal(openCityGate(p),false);for(const id of ['screening-record','observation','control-status'])interactChapterOne(p,id);p.spawned=18;p.phase='combat';clearLockdown(p,0);interactChapterOne(p,'control-status');interactChapterOne(p,'bus-manifest');assert.equal(p.mission,4);assert.equal(openCityGate(p),true);assert.equal(crossCityGate(p,{x:12,z:108}),false);assert.equal(crossCityGate(p,{x:15,z:114}),false);assert.equal(crossCityGate(p,{x:12,z:112}),true);assert.equal(p.optionalOpened,false);assert.equal(crossCityGate(p,{x:12,z:114}),false);});
+test('City threshold is a locked physical connection and preview geography is untouched',()=>{const preview=compileMap(SCREENING_CENTER),map=compileMap(chapterOneMap());assert.equal(preview.blocks.length,10);assert.equal(map.blocks.length,11);assert.equal(map.findPath({x:12,z:108},{x:12,z:114},{allowClosed:true}),null);map.unlockDoor('city-threshold');map.setDoorOpen('city-threshold',true);assert.equal(map.findPath({x:12,z:108},{x:12,z:114}).length,2);});

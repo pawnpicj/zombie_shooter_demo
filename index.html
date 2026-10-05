@@ -22,7 +22,7 @@
 <aside id="radio" hidden><label id="radioSpeaker"></label><p id="radioText"></p></aside>
 <aside id="supplyHud"><div><b id="moneyValue">$ 0</b><span id="materialValue">วัสดุ 0</span><button id="openShop" disabled>ร้าน / B</button></div><small id="itemCounts"></small><small id="grenadeCounts"></small></aside><div id="lootPrompt" hidden></div>
 <div id="waveNotice" role="status"></div>
-<div class="weapon"><div class="weapon-icon">⌁</div><div><label id="weaponName">M4 / ASSAULT RIFLE</label><div><b id="ammo">30</b><span> / 30 · <small class="reserve-label">สำรอง <b id="reserveAmmo">240</b></small></span></div><small id="reloadText">R เพื่อรีโหลด · หากระสุนจากกล่องใน Lab</small></div></div>
+<div class="weapon"><div class="weapon-icon">⌁</div><div><label id="weaponName">M4 / ASSAULT RIFLE</label><div><b id="ammo">30</b><span> / <b id="magazineSize">30</b> · <small class="reserve-label">สำรอง <b id="reserveAmmo">240</b></small></span></div><small id="reloadText">R เพื่อรีโหลด · หากระสุนจากกล่องใน Lab</small></div></div>
 <div class="bottom-hint">W A S D <span>เคลื่อนที่</span> &nbsp; MOUSE <span>เล็ง / คลิกค้างยิง</span> &nbsp; SPACE <span>พุ่งหลบ</span> &nbsp; E <span>ตรวจสอบ / เก็บข้อมูล</span> &nbsp; TAB <span>อัปสเตตัส</span> &nbsp; B <span>ร้าน</span> &nbsp; F <span>เปลี่ยนปืน</span></div>
 <div id="overlay"><article class="panel">
 <div class="eyebrow" id="eyebrow">PROJECT REGEN-X / JOHN VALENTINE</div>
@@ -32,6 +32,10 @@
 <label id="gameModeRow">โหมดเกม <select id="gameMode"><option value="campaign">เนื้อเรื่อง / Virus X</option><option value="survival">เอาชีวิตรอด / Endless</option></select></label>
 <button id="start" class="primary" disabled>กำลังโหลดสนามรบ…</button>
 <p class="subtle" id="tip">ตอนนำร่อง 3 ภารกิจ · กู้บันทึก เก็บสูตรรักษา แล้วถอนกำลัง</p>
+<p class="subtle"><a href="./map-test.html" style="color:#c5f358">สำรวจสนามทดสอบแผนที่</a></p>
+<p class="subtle" id="screeningPreview"><a href="./screening-center.html" style="color:#c5f358">Chapter 1 / สำรวจ Doge City Screening Center</a></p>
+<button id="chapterOneStart" class="primary">เริ่ม Chapter 1 แยก / Screening Center</button>
+<button id="chapterOneContinue" class="primary" hidden>เดินทางต่อไป Doge City →</button>
 </article></div>
 <div id="statsOverlay" hidden><article class="stats-panel" role="dialog" aria-modal="true" aria-labelledby="statsTitle">
 <label id="statsLevel">JOHN VALENTINE / LEVEL 1</label><h2 id="statsTitle">UPGRADE <span>STATUS</span></h2>
@@ -41,6 +45,7 @@
 </article></div>
 <div id="shopOverlay" hidden><article class="shop-panel" role="dialog" aria-modal="true" aria-labelledby="shopTitle"><label>REGEN-X / FIELD SUPPLY</label><h2 id="shopTitle">ARMORY <span>SHOP</span></h2><strong id="shopBalance"></strong><h3>อาวุธที่พบใน Lab</h3><div id="weaponRows"></div><p class="shop-note">หา SMG ทางตะวันตก, Shotgun ทางตะวันออก, DMR ทางเหนือ · F เปลี่ยนปืน</p><h3>ระเบิด — ซื้อเท่านั้น</h3><div id="grenadeRows"></div><p class="shop-note">Q เปลี่ยนชนิด · G ขว้างไปยังจุดเล็ง · V ใช้ยาวิ่ง · C ใช้โล่</p><button id="closeShop" class="primary">กลับสู่เกม / B</button></article></div>
 <script type="module" src="./desktop.js"></script>
+<script type="module" src="./chapter-entry.js"></script>
 <script type="module">
 try { await import('./game.js'); }
 catch (error) { document.querySelector('#description').textContent='ไม่สามารถเริ่มเกมได้: '+error.message; document.querySelector('#start').textContent='รัน npm install แล้วเปิดผ่าน npm start'; console.error(error); }

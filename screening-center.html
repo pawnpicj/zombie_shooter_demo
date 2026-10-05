@@ -1,0 +1,13 @@
+<!doctype html>
+<html lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>DEAD ZONE — Doge City Screening Center</title>
+<script type="importmap">{"imports":{"three":"./node_modules/three/build/three.module.js"}}</script>
+<link rel="stylesheet" href="./screening-center.css"><link rel="stylesheet" href="./map-desktop.css"></head>
+<body><header><a href="./index.html" aria-label="กลับไปเกมหลัก">DEAD<span>ZONE</span></a><div class="facility-name">DOGE CITY <small>SCREENING & QUARANTINE CENTER</small></div><div class="status"><a href="./index.html">กลับไปเกม</a></div></header>
+<main><section class="location"><small>CHAPTER 1 / พื้นที่สำรวจ</small><h1 id="roomName">Highway Entrance</h1><p id="roomDescription"></p></section>
+<section id="chapterMission" hidden><small>CHAPTER 1 / JOHN VALENTINE</small><h2 id="chapterMissionName"></h2><p id="chapterMissionText"></p><strong id="chapterHealth"></strong></section>
+<div id="chapterOverlay" hidden><article><h2>JOHN VALENTINE</h2><p id="chapterReport"></p><div id="chapterChoices"></div><button id="chapterAction">ดำเนินภารกิจต่อ</button></article></div>
+<aside class="map-panel"><div><strong>FACILITY MAP</strong><span id="visitedCount">1 / 10</span></div><canvas id="minimap" width="224" height="420" aria-label="แผนผังพื้นที่และตำแหน่ง John"></canvas><small>● JOHN &nbsp; สีสว่าง: สำรวจแล้ว</small></aside>
+<aside class="notes"><p id="status" role="status">สำรวจด่านและตรวจบันทึกตามพื้นที่</p><p id="note" hidden></p><small id="fieldHelp">WASD / ลูกศร: เดิน · E: ประตู / ตรวจสอบ · ESC: พัก<br>พื้นที่ทดสอบแผนที่และอาวุธ</small><div><button id="pause">พัก / ESC</button><button id="reset">เริ่มสำรวจใหม่</button></div></aside>
+<div id="prompt" hidden></div><div id="pauseOverlay" hidden><h2>พักการสำรวจ</h2><p>กด ESC หรือเล่นต่อ</p><button id="resume">เล่นต่อ</button></div></main>
+<aside id="fieldWeapon" aria-label="อาวุธ"><strong id="fieldWeaponName">M4X</strong><span><b id="fieldAmmo">30</b> / <b id="fieldCapacity">30</b> · สำรอง <b id="fieldReserve">240</b></span><small id="fieldReload">R: รีโหลด · F: เปลี่ยนปืน · เมาส์: เล็ง / ยิง</small><button id="fieldMute">เสียง: เปิด</button></aside>
+<script type="module" src="./desktop.js"></script><script type="module" src="./screening-center.js"></script></body></html>

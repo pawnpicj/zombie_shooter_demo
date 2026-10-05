@@ -3,12 +3,14 @@
 เกมเอาชีวิตรอดมุมมองเฉียง 3 มิติสำหรับคอมพิวเตอร์ ใช้ Three.js 0.180.0
 ทุกโมเดลสร้างด้วย geometry ในโค้ด ไม่ต้องโหลดภาพ โมเดล หรือเสียงจากภายนอก
 
+สถานะล่าสุด: Phase 10 — เสียงปืน/ผู้ติดเชื้อตามตำแหน่ง เสียงสะท้อนตามพื้นที่ และ ambient audio พร้อมใช้งาน ดู [PHASE10_AUDIO_PASS.md](docs/PHASE10_AUDIO_PASS.md) หัวข้อ Phase ด้านล่างบันทึกผลแต่ละช่วง
+
 ## เริ่มเล่น
 
 ต้องมี Node.js และ npm
 
 ```powershell
-cd D:\MyDev\CodexProject\zombie-shooter
+cd zombie_shooter_demo
 npm install
 npm start
 ```
@@ -151,3 +153,67 @@ npm run test:campaign
 กด E จะแสดงคำสั่งสำหรับจุดโต้ตอบเดียวที่ใช้ได้ในระยะ หากภารกิจและของอยู่ในระยะพร้อมกัน จะให้ภารกิจมาก่อน การพักหรือเสีย focus ล้างปุ่มเดินและยิงที่ค้างไว้; กลับมา focus ต้องกดเล่นต่อเอง
 
 ทดสอบ core ด้วย `npm run test:core` โดยตั้งค่า Puppeteer/Chrome ตาม Browser integration checks รายละเอียดผลและขอบเขตอยู่ใน `docs/PHASE2_CORE_SYSTEMS.md`
+
+## Phase 3 — Weapon Framework
+
+เก็บ VX-9 ที่ (-5,12) และ M4X ที่ (5,12) ใน Lab ด้วย E แมกกาซีนและกระสุนสำรองแยกตามปืน/ชนิด: VX-9 15 นัด, M4/M4X/SMG 30 นัด, Shotgun 6 นัด, DMR 10 นัด กล่องกระสุนเติมชนิดของปืนที่ถืออยู่
+
+F วนปืนในสามช่อง Primary / Secondary / Sidearm การเก็บปืนในช่องเดียวกันแทนปืนเดิมใน loadout แต่ยังเก็บปืนและอัปเกรดเดิมไว้ เลือกกลับเข้าช่องได้ในร้าน การสลับปืนไม่เติมกระสุนและยกเลิกรีโหลด มี accuracy/recoil/range และเสียงปืนแบบ spatial
+
+หัวข้อ Phase 3 นี้แทนคำอธิบายเดิมที่ว่าทุกปืนใช้ magazine/reserve ร่วมกัน ทดสอบด้วย `npm test` และ `npm run test:weapons` รายละเอียดอยู่ใน `docs/PHASE3_WEAPON_FRAMEWORK.md`
+
+## Phase 4 — Basic Enemy Framework
+
+Walker และ Runner จะตรวจจับผู้เล่นในระยะเมื่อไม่มีที่กำบังบัง ได้ยินเสียงยิงตามระยะปืน และไปตรวจตำแหน่งล่าสุด หากไม่พบผู้เล่นจะกลับ idle การ mute ไม่ทำให้ซอมบี้ไม่ได้ยินเสียงปืนในเกม Tank เดิมยังคงอยู่ใน Chapter 0/Survival อาจต้องออกค้นหาซอมบี้ที่อยู่นอกระยะเพื่อเคลียร์เวฟ
+
+ทดสอบด้วย `npm test` และ `npm run test:enemies` รายละเอียดและข้อจำกัดอยู่ใน `docs/PHASE4_ENEMY_FRAMEWORK.md`
+
+## Phase 5 — Block Puzzle Map Framework
+
+รองรับบล็อกทั้ง 11 แบบ หมุน 0/90/180/270 องศา พร้อม ports, ประตูล็อก, จุดเกิด/loot/objective, lighting/audio-zone metadata และเส้นทาง navigation ที่เปลี่ยนตามประตู
+
+เปิด [สนามทดสอบแผนที่](./map-test.html) จากหน้าเริ่มเกม เดินด้วย WASD กด E เปิดประตู/ใช้จุดภารกิจ: เข้า O ห้องควบคุม ปลดล็อก แล้วผ่าน L ที่หมุน 90 องศาไปยังจุดสิ้นสุด ห้อง T มีกล่องให้เก็บ สนามนี้เป็นการสำรวจ ไม่มีการต่อสู้หรือ Chapter 1
+
+ทดสอบด้วย `npm test` และ `npm run test:map` ดูวิธีสร้างแผนที่และ API ใน `docs/PHASE5_BLOCK_MAP_FRAMEWORK.md`
+
+## Phase 6 — Chapter 0 Validation
+
+Chapter 0 ผ่านครบสาม Mission พร้อมหลักฐาน การถอนตัว การคง Level/เงิน/ไอเทม/กระสุนระหว่างภารกิจ และการเริ่มใหม่ HUD แสดง MISSION โดยคงตัวแปรเดิมไว้ Unit 33/33 และ Browser ล่าสุด 8/8 ชุดผ่าน
+
+Windows package สร้างและตรวจเทียบ source แล้ว แต่ยังไม่ยืนยันการรัน native เพราะ Application Control policy ของเครื่องบล็อก Electron รายละเอียดและหลักฐานอยู่ใน `docs/PHASE6_CHAPTER0_VALIDATION.md` ผลนี้เป็น baseline ก่อนสร้าง Screening Center
+
+## Phase 7 — Doge City Screening Center
+
+หน้าเริ่มเกมมีลิงก์ **Chapter 1 / สำรวจ Doge City Screening Center** เดินสำรวจ Highway Entrance, Waiting, Screening, Security, Medical, Quarantine, Isolation, Control, Bus Depot และ City Gate ด้วย WASD/ลูกศร กด E เปิดประตูและอ่านบันทึก ESC พัก มีแผนผังย่อและเริ่มสำรวจใหม่ได้
+
+พื้นที่นี้เป็น preview แยก ยังไม่มีการต่อสู้ SG-12 หรือภารกิจ Chapter 1 ประตูเข้า Doge City ยังปิด ลิงก์สำรวจไม่แสดงระหว่างรอบเกมที่กำลังเล่น/พัก จึงไม่แทนที่ความคืบหน้า Chapter 0
+
+Unit 36/36, Browser ล่าสุด 4/4 ผ่าน ใช้ `npm run test:screening` เพื่อตรวจ walkthrough Windows package ตรวจ source แล้ว แต่ native ยังไม่ยืนยันด้วยข้อจำกัดเครื่องเดิม รายละเอียดใน `docs/PHASE7_SCREENING_CENTER.md`
+
+## Phase 8 — SG-12 Tactical Shotgun
+
+ใน Screening Center เปิดประตูทางซ้ายของ Screening Area เข้า Security Armory แล้วกด E ใกล้โต๊ะเพื่อเก็บ SG-12 ปืนเข้า Secondary: แมกกาซีน 6 นัด ยิง 8 pellets ต่อ Shell ระยะ 12 เมตร รีโหลด 3.2 วินาที มี recoil/แรงกระแทก/เสียงเฉพาะ ใช้กระสุนสำรองจำกัด 18 Shells ในสนามสำรวจ
+
+เมาส์เล็ง/คลิกค้างยิง · R รีโหลด · F เปลี่ยนปืน · ESC พัก เป้าฝึกในทางเดิน Security ไม่มี EXP หรือรางวัล กด E ใกล้แท่นเพื่อตั้งเป้าใหม่ การเก็บปืนซ้ำ เปลี่ยนปืน หรือตั้งเป้าไม่เติมกระสุน เริ่มสำรวจใหม่รีเซ็ต inventory ของสนามนี้ ซึ่งยังแยกจาก campaign
+
+Unit 42/42 และ Browser ล่าสุด 5/5 ผ่าน ทดสอบด้วย `npm run test:sg12` รายละเอียดใน `docs/PHASE8_SG12.md` Native Windows ยังไม่ยืนยันด้วย Application Control เดิม Phase 9 จะเป็นงานภารกิจ Chapter 1
+
+## Phase 9 — Chapter 1 Mission Logic
+
+เล่น Chapter 0 จบแล้วกด **เดินทางต่อไป Doge City** เพื่อรักษา Level, HP, Status/Points, เงิน, วัสดุ, ของใช้, weapon upgrades และกระสุนเดิม หรือกด **เริ่ม Chapter 1 แยก** ที่หน้าหลักเพื่อเริ่ม inventory ใหม่
+
+เล่น SILENT CHECKPOINT → ISOLATION WARD → LOCKDOWN (Walker/Runner 18 ตัว) → THE LAST BUS → ENTER DOGE CITY ตามลำดับ เปิดรถเสบียงเป็นทางเลือกและรับรางวัลครั้งเดียว กด E เปิดประตูท้ายด่านแล้วเดินผ่านจริงจึงจบ Chapter 1
+
+Tab เปิด Status ใช้ Points; E ที่ตู้บริการใน Control Center ซื้อระเบิด/อัปเกรดปืนที่ถือด้วยเงินและวัสดุ V ใช้ยาวิ่ง, C ใช้โล่, Q เลือกระเบิด, G ขว้าง ไม่ขายอาวุธและไม่มี grenade drop วัสดุยังใช้ระบบเดิมจนกว่าจะกำหนดสูตรย้ายไปสี่ประเภท
+
+Unit 49/49 และ Browser ล่าสุด 7/7 ชุดผ่าน รวม Chapter 0 carry-over, Chapter 1 จนข้ามประตู, SG-12, preview, weapons, smoke และ desktop UI fixture ตรวจซ้ำด้วย `npm run test:chapter1`; ตั้ง `CHAPTER1_TRANSITION_TEST=1` ก่อน `npm run test:campaign` สำหรับ carry-over ใช้ entry checkpoint ใน session เดียวสำหรับ retry/reload ไม่ใช่ save ถาวร
+
+ผลและข้อจำกัด Windows package อยู่ใน [Phase 9](docs/PHASE9_CHAPTER1_MISSIONS.md) Native Windows ยังไม่ยืนยันด้วย Application Control เดิม ขั้นถัดไปคือ Phase 10 Audio Pass
+
+## Phase 10 — Audio Pass
+
+เสียงปืนใช้ตำแหน่ง John, fire variants 4 แบบต่อปืน และ WAV ที่สร้างในโครงการผ่าน AudioLoader มีเสียงสะท้อนต่างกันตามห้อง/กลางแจ้ง รีโหลดแยกถอดแมกกาซีน ใส่ และขึ้นลำตามเวลาในเกม เปลี่ยนปืนยกเลิกเสียงจังหวะที่เหลือ
+
+เพิ่มเสียงฝน/ลม ventilation/electrical hum ผู้ติดเชื้อ ประตู ฝีเท้า กระสุนกระทบ และ LOCKDOWN เสียงหยุดเมื่อพัก เปิดรายงาน หรือปิดเสียง; muted shot ยังส่ง noise ให้ AI ตามเดิม ปุ่มเสียงเดิมควบคุมทั้งชุด Audio เริ่มหลังคลิกหรือกดปุ่มครั้งแรกตามข้อกำหนด autoplay ของ Browser
+
+Unit 54/54 และ Browser 8/8 ผ่าน Windows package รวม WAV 63 ไฟล์และ manifest ตรวจตรงกับ source แล้ว Native execution ยังไม่ยืนยันด้วย Application Control เดิม ตรวจซ้ำด้วย `npm run test:audio`; สร้าง WAV ซ้ำด้วย `npm run audio:generate` รายละเอียดใน [Phase 10](docs/PHASE10_AUDIO_PASS.md) ขั้นถัดไป Phase 11 Polish

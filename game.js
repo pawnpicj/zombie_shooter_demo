@@ -3,6 +3,9 @@ import { ARENA, MAGAZINE, waveConfig, segmentHit, moveCircle } from './rules.mjs
 import { CAMPAIGN, createCampaign, clearCampaignWave, interactCampaign } from './story.mjs';
 import { revealHud } from './hud.js';
 import { selectInteraction } from './interaction.mjs';
+import {createAudioEngine} from './audio-engine.js';
+import { createWeaponAudio } from './weapon-audio.js';
+import {ENEMIES,createEnemy,hearWeapon,updateEnemy,damageEnemy} from './enemies.mjs';
 import { initSupplies } from './supplies.js';
 import { STATUS, createProgression, xpRequired, gainExperience, spendPoint, combatStats, rollShot } from './progression.mjs';
 
@@ -163,6 +166,11 @@ muzzle.visible = false;
 const aimMarker = new THREE.Mesh(new THREE.RingGeometry(.18, .25, 24), new THREE.MeshBasicMaterial({ color: 0xc5f358, transparent:true, opacity:.65, side:THREE.DoubleSide }));
 aimMarker.rotation.x = -Math.PI/2; aimMarker.position.y = .025; scene.add(aimMarker);
 const zombies = [], bullets = [], particles = [], pickups = [], corpses = [];
+let enemySequence=0;
+window.addEventListener('weapon-noise',event=>{
+  if(state!=='playing')return;
+  for(const enemy of zombies)hearWeapon(enemy,enemy.mesh.position,event.detail);
+});
 const keys = new Set();
 const pointer = new THREE.Vector2(0, 0);
 const ray = new THREE.Raycaster(), ground = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0), aim = new THREE.Vector3(0, 0, -8);
@@ -173,6 +181,15 @@ let progression=createProgression(), statsReturnState='playing', criticalTimer=0
 let state = 'ready', hp = 100, wave = 0, kills = 0, score = 0, ammo = MAGAZINE;
 let waveLeft = 0, spawnTimer = 0, nextWaveTimer = 0, shotTimer = 0, reloadTimer = 0, invincible = 0, dashTimer = 0, dashCooldown = 0;
 let elapsed = 0, shooting = false, noticeTimer = 0, flashTimer = 0, damageFlash = 0, muted = false, audio;
+const soundscape=createAudioEngine(camera,scene,()=>muted,()=>obstacles);const weaponAudio=createWeaponAudio(camera,player,()=>muted,{engine:soundscape,getEnvironment:()=>'LARGE_ROOM'});const toneVoices=new Set();
+let dryTimer=0, lastWeaponSound=null;
+function weaponSound(event,gun=supplies.definition()){
+  weaponAudio.play(event,gun,{reloadSeconds:reloadTimer});
+  if(event==='fire'){
+    lastWeaponSound={weapon:gun.name,x:player.position.x,z:player.position.z,radius:gun.soundRadius,time:elapsed};
+    window.dispatchEvent(new CustomEvent('weapon-noise',{detail:{...lastWeaponSound}}));
+  }
+}
 let dashDirection = new THREE.Vector2(0, -1), best = 0;
 try { best = Number(localStorage.getItem('dead-zone-best')) || 0; } catch {}
 function tone(freq, duration, volume, type = 'sawtooth') {
@@ -181,12 +198,15 @@ function tone(freq, duration, volume, type = 'sawtooth') {
   oscillator.type = type; oscillator.frequency.setValueAtTime(freq, audio.currentTime);
   oscillator.frequency.exponentialRampToValueAtTime(Math.max(30, freq * .35), audio.currentTime + duration);
   gain.gain.setValueAtTime(volume, audio.currentTime); gain.gain.exponentialRampToValueAtTime(.001, audio.currentTime + duration);
-  oscillator.connect(gain).connect(audio.destination); oscillator.start(); oscillator.stop(audio.currentTime + duration);
+  oscillator.connect(gain).connect(audio.destination);toneVoices.add(oscillator);oscillator.onended=()=>{toneVoices.delete(oscillator);oscillator.disconnect();gain.disconnect();}; oscillator.start(); oscillator.stop(audio.currentTime + duration);
 }
+function stopTones(){for(const oscillator of toneVoices){oscillator.stop();}toneVoices.clear();}
 function notice(text) { $('waveNotice').textContent = text; noticeTimer = 2.8; $('waveNotice').style.opacity = 1; }
 function remove(array, i) { scene.remove(array[i].mesh); array.splice(i, 1); }
 function clear(array) { for (const o of array) scene.remove(o.mesh); array.length = 0; }
 function updateHud() {
+  $('screeningPreview').hidden=state!=='ready';
+  $('chapterOneStart').hidden=state!=='ready';$('chapterOneContinue').hidden=state!=='won'||gameMode!=='campaign'||!campaign.complete;
   supplies?.updateHud();
   $('playerLevel').textContent='LEVEL '+String(progression.level).padStart(2,'0');
   $('xpText').textContent=progression.xp+' / '+xpRequired(progression.level)+' EXP';
@@ -195,7 +215,7 @@ function updateHud() {
   $('openStats').classList.toggle('has-points',progression.points>0);
   $('openStats').disabled=!['playing','paused','stats'].includes(state);
 
-  $('waveLabel').textContent=gameMode==='campaign'?'CHAPTER':'WAVE';
+  $('waveLabel').textContent=gameMode==='campaign'?'MISSION':'WAVE';
   $('protocolLabel').textContent=gameMode==='campaign'?'OPERATION VIRUS X':'SURVIVAL PROTOCOL';
   $('missionHud').hidden=gameMode!=='campaign';
   if(gameMode==='campaign'){
@@ -302,6 +322,7 @@ function showReport(report,completed=false){
   $('tip').textContent=completed?'คะแนน '+score+' · กำจัด '+kills+' ผู้ติดเชื้อ · John Valentine / Mission Complete':report.next;
   $('start').textContent=report.action;
   $('radio').hidden=true;
+  $('chapterOneContinue').hidden=!completed;
 }
 function currentInteraction(){
   const report=CAMPAIGN[campaign.chapter];
@@ -315,6 +336,7 @@ function currentInteraction(){
 function interact(){
   if(state!=='playing')return;
   currentInteraction()?.activate();
+  updateHud();
 }
 function completeMissionInteraction(){
   const report=CAMPAIGN[campaign.chapter];
@@ -341,16 +363,17 @@ function nextWave() {
   tone(400, .2, .08, 'sine'); updateHud();
 }
 function start() {
-  if (!audio) { try { audio = new (window.AudioContext || window.webkitAudioContext)(); } catch {} }
+  soundscape.unlock();audio=soundscape.getListener().context;
   if (audio?.state === 'suspended') audio.resume();
   const continuing=state==='paused'||state==='dialogue';
   if(state==='dialogue')nextWave();
   if (!continuing) {
     gameMode=$('gameMode').value;campaign=createCampaign();progression=createProgression();supplies.reset();$('radio').hidden=true;$('statsOverlay').hidden=true;criticalTimer=0;$('criticalFeedback').style.opacity=0;
     for (const list of [zombies, bullets, particles, pickups, corpses]) clear(list);
-    hp = 100; wave = kills = score = elapsed = 0; ammo = MAGAZINE;
+    hp = 100; wave = kills = score = elapsed = 0; ammo = supplies.ammo();enemySequence=0;lastWeaponSound=null;dryTimer=0;weaponAudio.mute();weaponAudio.cancelReload();
     waveLeft = spawnTimer = nextWaveTimer = shotTimer = reloadTimer = invincible = dashTimer = dashCooldown = damageFlash = flashTimer = 0;
     player.position.set(0, 0, gameMode==='campaign'?18:0); player.rotation.y = 0; muzzle.visible = false;
+    updateCamera();
     nextWave();
   }
   keys.clear(); shooting = false; state = 'playing';
@@ -365,16 +388,15 @@ function pause() {
   else if (state === 'paused') start();
 }
 function reload() {
-  if (state === 'playing' && reloadTimer <= 0 && ammo < MAGAZINE && supplies.canReload()) { reloadTimer = getCombatStats().reloadSeconds; tone(650, .09, .035, 'square'); }
+  if (state === 'playing' && reloadTimer <= 0 && ammo < supplies.definition().magazineSize && supplies.canReload()) { reloadTimer = getCombatStats().reloadSeconds; weaponSound('reload'); }
 }
 function spawnZombie() {
-  const config = waveConfig(wave);
   const roll = Math.random();
   const type = wave >= 3 && roll < .13 ? 'tank' : wave >= 2 && roll < .35 ? 'runner' : 'normal';
   const body = actor(true, type);
   const edge = Math.floor(Math.random() * 4), offset = (Math.random()-.5)*40;
   body.position.set(edge < 2 ? (edge === 0 ? -22 : 22) : offset, 0, edge >= 2 ? (edge === 2 ? -22 : 22) : offset);
-  zombies.push({ mesh:body, hp:config.health * (type === 'tank' ? 3 : type === 'runner' ? .7 : 1), speed:config.speed * (type === 'runner' ? 1.6 : type === 'tank' ? .65 : 1), radius:type === 'tank' ? .7 : .46, type, phase:Math.random()*6.28, side:Math.random()>.5 ? 1 : -1, attack:0 });
+  zombies.push({...createEnemy(type,wave),id:++enemySequence,mesh:body,phase:Math.random()*6.28,side:Math.random()>.5?1:-1});
 }
 function burst(position, color, count = 7) {
   for (let i=0; i<count; i++) {
@@ -390,7 +412,7 @@ function dropMed(position) {
   scene.add(g); pickups.push({ mesh:g, life:18 });
 }
 function killZombie(index) {
-  const z = zombies[index], pos = z.mesh.position.clone();
+  const z = zombies[index], pos = z.mesh.position.clone();soundscape.cue('death',pos,{type:z.type});
   supplies.reward(z.type);supplies.drop(pos);
   burst(pos, 0xa2c55d);
   const corpse = mesh('cube', 0x34453c, [pos.x, .05, pos.z], [.6, .09, 1]);
@@ -404,15 +426,16 @@ function fire() {
   const direction = new THREE.Vector3(aim.x-player.position.x, 0, aim.z-player.position.z).normalize();
   if (direction.lengthSq() < .001) return;
   const stats=getCombatStats(),shot=rollShot(stats);
-  ammo--; shotTimer = stats.shotInterval;
+  if(!supplies.fire(stats.shotInterval))return;
+  ammo=supplies.ammo();shotTimer = stats.shotInterval;
   const origin = player.localToWorld(new THREE.Vector3(.27, 1.25, -1.14));
   for(let pellet=0;pellet<stats.pellets;pellet++){
-    const spread=(pellet-(stats.pellets-1)/2)*.11,dir=direction.clone().applyAxisAngle(new THREE.Vector3(0,1,0),spread);
+    const spread=supplies.spread(pellet),dir=direction.clone().applyAxisAngle(new THREE.Vector3(0,1,0),spread);
     const tracer = mesh('cube', 0xffdf8e, [origin.x, .9, origin.z], [.06, .06, .75], scene, true);
     tracer.rotation.y = player.rotation.y-spread;
-    bullets.push({ mesh:tracer, vx:dir.x*52, vz:dir.z*52, life:.95, damage:shot.damage, critical:shot.critical });
+    bullets.push({ mesh:tracer, vx:dir.x*52, vz:dir.z*52, life:stats.range/52, damage:shot.damage, critical:shot.critical, stoppingPower:stats.stoppingPower,source:{x:player.position.x,z:player.position.z} });
   }
-  flashTimer = .055; muzzle.visible = true; tone(145+Math.random()*35, .055, .038);
+  flashTimer = .055; muzzle.visible = true; weaponSound('fire');
   if (ammo === 0) reload();
 }
 function segmentBox(ax, az, bx, bz, o) {
@@ -436,7 +459,9 @@ function update(dt) {
   invincible=Math.max(0,invincible-dt); shotTimer-=dt; dashCooldown=Math.max(0,dashCooldown-dt);
   flashTimer-=dt; muzzle.visible=flashTimer>0;
   damageFlash=Math.max(0,damageFlash-dt*2.5); $('damage').style.opacity=damageFlash;
-  if (reloadTimer>0) { reloadTimer-=dt; if(reloadTimer<=0) {ammo+=supplies.reload(MAGAZINE-ammo); reloadTimer=0; tone(800,.06,.04,'square');} }
+  dryTimer=Math.max(0,dryTimer-dt);
+  if (reloadTimer>0) { reloadTimer-=dt; if(reloadTimer<=0) {supplies.reload();ammo=supplies.ammo();reloadTimer=0;} }
+  weaponAudio.syncReload(reloadTimer,supplies.definition());
   const move = new THREE.Vector2((keys.has('KeyD')||keys.has('ArrowRight')?1:0)-(keys.has('KeyA')||keys.has('ArrowLeft')?1:0), (keys.has('KeyS')||keys.has('ArrowDown')?1:0)-(keys.has('KeyW')||keys.has('ArrowUp')?1:0));
   if(move.lengthSq()>0) move.normalize();
   if(keys.has('Space') && dashCooldown<=0 && dashTimer<=0) {
@@ -454,17 +479,18 @@ function update(dt) {
   player.userData.legs.forEach((leg,i)=>leg.rotation.x=move.lengthSq() ? Math.sin(elapsed*14+i*Math.PI)*.45 : 0);
   playerLight.intensity = dashTimer>0 ? 14 : 3;
   if(shooting && shotTimer<=0 && reloadTimer<=0 && ammo>0) fire();
+  if(shooting && ammo===0 && reloadTimer<=0 && dryTimer<=0){weaponSound('dry');dryTimer=.4;reload();}
   if(waveLeft>0) {
     spawnTimer-=dt;
     if(spawnTimer<=0) {spawnZombie();waveLeft--;spawnTimer=waveConfig(wave).interval;}
   }
   for(let i=zombies.length-1; i>=0; i--) {
     const z=zombies[i], pos=z.mesh.position;
-    let x=player.position.x-pos.x, zz=player.position.z-pos.z, length=Math.hypot(x,zz)||1;
-    x/=length; zz/=length;
+    const intent=updateEnemy(z,pos,player.position,obstacles,dt);z.voiceTimer=(z.voiceTimer??0)-dt;if(z.voiceTimer<=0){z.voiceTimer=3.5+Math.random()*3;soundscape.cue('growl',pos,{type:z.type});}if(intent.attack)soundscape.cue('attack',pos,{type:z.type});
+    let x=intent.moving?intent.x:0,zz=intent.moving?intent.z:0;
     // Steer around nearby cover before movement, choosing a stable passing side.
     const ahead={x:pos.x+x*1.6,z:pos.z+zz*1.6};
-    for(const o of obstacles) {
+    for(const o of intent.moving?obstacles:[]) {
       if(Math.abs(ahead.x-o.x)<o.w/2+z.radius+.2 && Math.abs(ahead.z-o.z)<o.d/2+z.radius+.2) {
         const nx=-zz*z.side, nz=x*z.side;
         x=x*.25+nx;zz=zz*.25+nz;const n=Math.hypot(x,zz);x/=n;zz/=n;break;
@@ -478,11 +504,10 @@ function update(dt) {
       if(d>0 && d<z.radius+other.radius) {sx+=ax/d*.75;sz+=az/d*.75;}
     }
     moveCircle(pos,(x*z.speed+sx)*dt,(zz*z.speed+sz)*dt,z.radius,obstacles);
-    z.mesh.rotation.y=Math.atan2(-x,-zz);
-    z.mesh.userData.legs.forEach((leg,j)=>leg.rotation.x=Math.sin(elapsed*z.speed*5+z.phase+j*Math.PI)*.4);
-    z.attack-=dt;
-    if(pos.distanceTo(player.position)<z.radius+.65 && z.attack<=0 && invincible<=0) {
-      hp=Math.max(0,hp-supplies.absorbDamage(z.type==='tank'?20:10)); invincible=.45;z.attack=.9;damageFlash=.9;
+    if(intent.moving||z.brain.state==='attacking')z.mesh.rotation.y=Math.atan2(-intent.x,-intent.z);
+    z.mesh.userData.legs.forEach((leg,j)=>leg.rotation.x=intent.moving?Math.sin(elapsed*z.speed*5+z.phase+j*Math.PI)*.4:0);
+    if(intent.attack && invincible<=0) {
+      hp=Math.max(0,hp-supplies.absorbDamage(ENEMIES[z.type].damage)); invincible=.45;damageFlash=.9;
       tone(60,.15,.09,'triangle');
       if(hp===0) {
         state='dead';shooting=false;keys.clear();best=Math.max(best,score);
@@ -492,7 +517,7 @@ function update(dt) {
     }
   }
   for(let i=bullets.length-1;i>=0;i--) {
-    const b=bullets[i], p=b.mesh.position, ax=p.x,az=p.z,bx=ax+b.vx*dt,bz=az+b.vz*dt;
+    const b=bullets[i], p=b.mesh.position, ax=p.x,az=p.z,step=Math.min(dt,b.life),bx=ax+b.vx*step,bz=az+b.vz*step;
     let target=-1, hitT=1.01;
     for(const o of obstacles) {const t=segmentBox(ax,az,bx,bz,o);if(t!==null && t<hitT){hitT=t;target=-2;}}
     for(let j=0;j<zombies.length;j++) {
@@ -509,10 +534,12 @@ function update(dt) {
     if(target!==-1) {
       const hitPos=new THREE.Vector3(ax+(bx-ax)*hitT,0,az+(bz-az)*hitT);
       if(target>=0) {
-        zombies[target].hp-=b.damage;burst(hitPos,b.critical?0xffcf69:0xb5cf64,b.critical?6:3);
+        const killed=damageEnemy(zombies[target],b.damage,b.source);if(!killed)soundscape.cue('hit',zombies[target].mesh.position,{type:zombies[target].type});
+        if(b.stoppingPower>0)moveCircle(zombies[target].mesh.position,b.vx/52*b.stoppingPower,b.vz/52*b.stoppingPower,zombies[target].radius,obstacles);
+        burst(hitPos,b.critical?0xffcf69:0xb5cf64,b.critical?6:3);
         if(b.critical){criticalTimer=.55;$('criticalFeedback').textContent='CRITICAL / '+Math.round(b.damage);}
-        if(zombies[target].hp<=0) killZombie(target);
-      } else burst(hitPos,0xefbb68,3);
+        if(killed) killZombie(target);
+      } else {soundscape.cue('impact',hitPos);burst(hitPos,0xefbb68,3);}
       remove(bullets,i);
     } else if(b.life<=0 || Math.abs(p.x)>24 || Math.abs(p.z)>24) remove(bullets,i);
   }
@@ -580,14 +607,14 @@ renderer.domElement.addEventListener('webglcontextlost',event=>{
   $('start').disabled=true;
 });
 $('start').addEventListener('click',start);$('pause').addEventListener('click',pause);
-$('mute').addEventListener('click',()=>{muted=!muted;$('mute').textContent='เสียง: '+(muted?'ปิด':'เปิด');});
+$('mute').addEventListener('click',()=>{muted=!muted;if(muted){weaponAudio.mute();stopTones();}else soundscape.unlock();$('mute').textContent='เสียง: '+(muted?'ปิด':'เปิด');});
 $('start').disabled=false;$('start').textContent='เริ่มภารกิจ →';
 if(matchMedia('(pointer: coarse)').matches)$('tip').textContent='เวอร์ชันนี้ใช้คีย์บอร์ดและเมาส์ กรุณาเล่นบนคอมพิวเตอร์';
-supplies=initSupplies({scene,mesh,player,notice,tone,burst,
-  getState:()=>state,getAim:()=>aim,cancelReload:()=>{reloadTimer=0;shotTimer=0;shooting=false;},
+supplies=initSupplies({scene,mesh,player,notice,tone,burst,weaponSound,
+  getState:()=>state,getAim:()=>aim,cancelReload:()=>{weaponAudio.cancelReload();reloadTimer=0;ammo=supplies.ammo();shooting=false;updateHud();},
   freeze:next=>{state=next;keys.clear();shooting=false;$('overlay').classList.add('hidden');$('crosshair').style.display='none';$('interactPrompt').hidden=true;document.body.classList.remove('playing');},
   restore:previous=>{state='paused';if(previous==='playing')start();else{showOverlay('paused');updateHud();}},
-  harmZombies:(x,z,radius,damage)=>{for(let i=zombies.length-1;i>=0;i--){const enemy=zombies[i];if(Math.hypot(enemy.mesh.position.x-x,enemy.mesh.position.z-z)<=radius+enemy.radius){enemy.hp-=damage;if(enemy.hp<=0)killZombie(i);}}}
+  harmZombies:(x,z,radius,damage)=>{for(let i=zombies.length-1;i>=0;i--){const enemy=zombies[i];if(Math.hypot(enemy.mesh.position.x-x,enemy.mesh.position.z-z)<=radius+enemy.radius){if(damageEnemy(enemy,damage,{x,z}))killZombie(i);}}}
 });
 updateHud();
 let last=performance.now();
@@ -600,7 +627,10 @@ renderer.setAnimationLoop(now=>{
     }
   }
   if(noticeTimer>0 && state==='playing'){noticeTimer-=dt;if(noticeTimer<=0)$('waveNotice').style.opacity=0;}
-  updateCamera();renderer.render(scene,camera);
+  updateCamera();soundscape.update(dt,{playing:state==='playing',position:player.position,environment:'LARGE_ROOM'});if(state!=='playing'||muted)stopTones();renderer.render(scene,camera);
 });
 // Read-only telemetry for runtime verification and future HUD integrations.
-Object.defineProperty(window,'zombieShooter',{get:()=>({state,gameMode,core:{elapsed,camera:{x:camera.position.x,y:camera.position.y,z:camera.position.z,left:camera.left,right:camera.right,top:camera.top,bottom:camera.bottom},obstacles:obstacles.map(o=>({...o})),interaction:currentInteraction()?.id??null},inventory:supplies.snapshot(),maxHp:progression.maxHp,progression:{...progression,ranks:{...progression.ranks}},combatStats:getCombatStats(),campaign:{chapter:campaign.chapter,phase:campaign.phase,evidence:[...campaign.evidence],complete:campaign.complete},objective:{...CAMPAIGN[campaign.chapter].point},hp,wave,kills,score,ammo,reloadTimer,zombies:zombies.length,remaining:waveLeft,bullets:bullets.length,player:{x:player.position.x,z:player.position.z},threeRevision:THREE.REVISION,targets:zombies.map(z=>{const point=z.mesh.position.clone().project(camera);return {x:(point.x+1)*innerWidth/2,y:(1-point.y)*innerHeight/2,distance:z.mesh.position.distanceTo(player.position)};})})});
+Object.defineProperty(window,'zombieShooter',{get:()=>({state,gameMode,core:{elapsed,lastWeaponSound:lastWeaponSound?{...lastWeaponSound}:null,camera:{x:camera.position.x,y:camera.position.y,z:camera.position.z,left:camera.left,right:camera.right,top:camera.top,bottom:camera.bottom},obstacles:obstacles.map(o=>({...o})),interaction:currentInteraction()?.id??null},inventory:supplies.snapshot(),maxHp:progression.maxHp,progression:{...progression,ranks:{...progression.ranks}},combatStats:getCombatStats(),campaign:{chapter:campaign.chapter,phase:campaign.phase,evidence:[...campaign.evidence],complete:campaign.complete},objective:{...CAMPAIGN[campaign.chapter].point},hp,wave,kills,score,ammo,reloadTimer,enemies:zombies.map(z=>({id:z.id,type:z.type,hp:z.hp,x:z.mesh.position.x,z:z.mesh.position.z,state:z.brain.state,stimulus:z.brain.stimulus,lastKnownPlayerPosition:z.brain.lastKnownPlayerPosition?{...z.brain.lastKnownPlayerPosition}:null})),zombies:zombies.length,remaining:waveLeft,bullets:bullets.length,player:{x:player.position.x,z:player.position.z},threeRevision:THREE.REVISION,targets:zombies.map(z=>{const point=z.mesh.position.clone().project(camera);return {x:(point.x+1)*innerWidth/2,y:(1-point.y)*innerHeight/2,distance:z.mesh.position.distanceTo(player.position)};})})});
+
+window.addEventListener('keydown',()=>soundscape.unlock(),{capture:true});window.addEventListener('pointerdown',()=>soundscape.unlock(),{capture:true});
+Object.defineProperty(window,'deadZoneAudio',{get:()=>({scene:soundscape.snapshot(),weapon:weaponAudio.snapshot()})});

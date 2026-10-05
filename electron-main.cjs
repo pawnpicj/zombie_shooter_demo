@@ -1,10 +1,11 @@
 const { app, BrowserWindow, ipcMain, Menu } = require('electron');
 const fs = require('node:fs');
 const path = require('node:path');
+const {isLocalPage}=require('./local-pages.cjs');
 const testMode = process.argv.includes('--self-test');
 const testRoot=app.isPackaged?path.join(path.dirname(app.getPath('exe')),'test-artifacts'):path.join(__dirname,'artifacts');
 if (testMode) app.setPath('userData', path.join(testRoot, 'desktop-test-profile'));
-let win, mode = 'windowed', previousMode = 'windowed', normalBounds, settingsPath;
+let win, mode = 'windowed', previousMode = 'windowed', normalBounds, settingsPath, chapterTransfer=null;
 const modes = ['windowed', 'borderless', 'fullscreen'];
 const sizes = [[960,640],[1280,720],[1600,900],[1920,1080]];
 function state() { return { mode, maximized:win.isMaximized(), width:win.getContentSize()[0], height:win.getContentSize()[1] }; }
@@ -31,6 +32,7 @@ function verifySender(event) {
   if (!win || event.sender !== win.webContents || event.senderFrame !== win.webContents.mainFrame) throw new Error('Untrusted window command');
 }
 app.whenReady().then(async()=>{
+  const {validateTransfer}=await import('./chapter-transfer.mjs');
   settingsPath=path.join(app.getPath('userData'),'window-settings.json');
   let settings={};
   if(!testMode) {try{settings=JSON.parse(fs.readFileSync(settingsPath,'utf8'));}catch{}}
@@ -43,9 +45,12 @@ app.whenReady().then(async()=>{
   });
   Menu.setApplicationMenu(null);
   win.webContents.setWindowOpenHandler(()=>({action:'deny'}));
-  win.webContents.on('will-navigate',(event,url)=>{ if(url !== win.webContents.getURL()) event.preventDefault(); });
+  win.webContents.on('will-navigate',(event,url)=>{ if(!isLocalPage(url,__dirname)) event.preventDefault(); });
   win.webContents.session.setPermissionRequestHandler((_wc,_permission,callback)=>callback(false));
   const actions={
+    'chapter:store':(_event,payload)=>{if(JSON.stringify(payload).length>65536)throw new Error('Transfer too large');chapterTransfer=validateTransfer(payload);return true;},
+    'chapter:read':()=>chapterTransfer?JSON.parse(JSON.stringify(chapterTransfer)):null,
+    'chapter:clear':()=>{chapterTransfer=null;return true;},
     'window:get':()=>state(),
     'window:mode':(_event,value)=>setMode(value),
     'window:size':(_event,width,height)=>setSize(width,height),

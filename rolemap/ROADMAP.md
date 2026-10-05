@@ -1976,3 +1976,95 @@ Phase 2 is COMPLETE. See [PHASE2_CORE_SYSTEMS.md](../docs/PHASE2_CORE_SYSTEMS.md
 - Evidence: artifacts/phase2/. Existing dist executable was not replaced.
 - Stop after Phase 2. The next authorized phase should be Phase 3 Weapon Framework, preserving legacy weapons and §56 decisions.
 
+## 59. Phase 3 Weapon Framework — 2026-10-05
+
+- Implementation and Browser validation are complete. See [PHASE3_WEAPON_FRAMEWORK.md](../docs/PHASE3_WEAPON_FRAMEWORK.md).
+- Centralized configurable weapon definitions, per-weapon magazines, typed finite reserves, accuracy/recoil/range, reload cancellation and fire cooldown conservation.
+- VX-9 and M4X can be collected in the current Lab. Preserved legacy weapons, ownership and upgrades with three active slots; displaced weapons remain selectable through the shop.
+- Positional procedural firing variations and reload/dry/equip sounds; weapon-noise events for future enemy awareness.
+- Chapter 1 loadout hook preserves inventory but is not connected to the Chapter 0 pilot missions. No Chapter 1 map, SG-12, vending terminal or material migration added.
+- Unit tests 21/21; latest Browser checks 8/8 passed. Initial core/supplies failures and corrected runs are documented with logs in artifacts/phase3/.
+- Windows source and packaged validation remain unverified because the Electron runtime download did not complete. Do not carry forward Phase 2 Windows results as proof of Phase 3.
+- Stop here. Phase 4 enemy awareness and outstanding Windows validation require follow-up work.
+
+## 60. Phase 4 Basic Enemy Framework — 2026-10-05
+
+- Implementation and Browser validation are complete. See [PHASE4_ENEMY_FRAMEWORK.md](../docs/PHASE4_ENEMY_FRAMEWORK.md).
+- Walker and Runner share reusable idle/detection/investigation/chase/attack/damage/death logic. Legacy Tank remains in Chapter 0 and Survival.
+- Vision respects range and cover; hearing respects both weapon soundRadius and enemy hearingRange. Sound copies the source position and does not alert the entire map.
+- Lost sight uses last-known position and finite memory; pause freezes AI. Projectile hits alert survivors to the shot origin; blast damage alerts to the blast location.
+- Unit tests 27/27; latest Browser checks 6/6 passed, including complete pilot campaign and supplies. Tests now search idle enemies using real input rather than assuming omniscient pursuit.
+- Evidence and initial failures are preserved in artifacts/phase4/. Windows validation remains unverified due to the outstanding Electron runtime limitation.
+- No new Chapter 1 map, future enemy type or map connectivity/sound propagation system added. Stop after Phase 4; the next roadmap phase is Phase 5 Block Puzzle Map Framework.
+
+## 61. Phase 5 Block Puzzle Map Framework — 2026-10-05
+
+- Framework and test-map implementation are complete. See [PHASE5_BLOCK_MAP_FRAMEWORK.md](../docs/PHASE5_BLOCK_MAP_FRAMEWORK.md).
+- All eleven shapes support normalized quarter-turn rotation, placement, boundary ports, connected/locked doors, spawn/objective locations and lighting/environment/audio-zone metadata.
+- Compiler rejects overlapping modules, invalid ports/spawns and mismatched connections. Walls/doors feed shared movement and sight geometry; cell navigation updates immediately with door state and checks door clearance against agent radius.
+- A separate 15-cell test map uses DOT, LINE_2, O, rotated L and T modules. Real input verifies door collision, objective unlock, one-use loot, route preview, safe door closure, pause/reset and responsive rendering.
+- Unit 33/33 and Browser 2/2 passed (map integration plus main-game smoke). Evidence and earlier timing/tangency failures remain in artifacts/phase5/.
+- Chapter 0 scene/combat were preserved; the main menu links to the map sandbox. Enemy spawn markers are data locations, not active combat. No Chapter 1 integration or sound propagation added.
+- Native Windows validation remains unverified due to the existing Electron runtime limitation.
+- Stop after Phase 5. Next roadmap work is Phase 6 Chapter 0 Validation before Chapter 1 Screening Center.
+
+## 62. Phase 6 Chapter 0 Validation — 2026-10-05
+
+- Chapter 0 Browser validation is complete: Mission 1, Mission 2 and Mission 3 retain the original pilot flow. See [PHASE6_CHAPTER0_VALIDATION.md](../docs/PHASE6_CHAPTER0_VALIDATION.md).
+- HUD now says MISSION; legacy campaign.chapter remains compatible. No Lab redesign or Chapter 1 transition added.
+- Verified evidence proximity/one-use gates, frozen reports, preservation of progression/inventory/ammo across missions, extraction and fresh replay.
+- Unit 33/33; latest Browser campaign/core/combat/level/hud/supplies/weapons/enemies 8/8 passed. Initial failures and corrected runs are preserved in artifacts/phase6/.
+- Survival/Level test bots use real navigation and ammunition pickup to satisfy awareness/finite-ammo preconditions; no game-state mutation or relaxed pass assertions.
+- Verified Electron 44.5.1 archive checksum, created isolated Windows package and matched 20 runtime files plus Three.js modules/package metadata to source.
+- Native Windows execution remains unverified: Windows Application Control blocked the Electron executable. Policy was not changed; Phase 2 native results are not proof of current source.
+- Stop after Phase 6 validation. Native smoke testing remains outstanding on an allowed Windows environment. Next map work is Phase 7 Chapter 1 Screening Center.
+
+## 63. Phase 7 Chapter 1 Screening Center — 2026-10-05
+
+- Geography/exploration implementation is complete. See [PHASE7_SCREENING_CENTER.md](../docs/PHASE7_SCREENING_CENTER.md).
+- Ten required areas use 38 Block Puzzle cells and 10 connected doors; Security/Quarantine and Medical/Isolation branches reconverge at Control Center before Bus Depot and City Gate.
+- Added authored evening checkpoint environment, vehicles/ambulance/buses/tent/medical props with collision, area signs, inspection notes, outdoor rain, following camera, minimap, visited areas, pause and reset.
+- Preview is accessible from the initial menu; hidden during an active/paused run to preserve existing progress. Chapter 0 and Survival are unchanged apart from this preview guard.
+- Electron navigation is restricted to three exact authored local entry pages. Both map pages use existing desktop controls; preload/IPC restrictions remain in place.
+- Unit 36/36; latest Browser screening/smoke/map/map-desktop 4/4 passed. Desktop Browser checks use a mock bridge and do not validate native window effects.
+- Final Windows package source integrity: 27 runtime files plus Three.js module/core and package metadata match source. Actual native execution remains unverified due to the previously observed Application Control block.
+- Initial timing failures and a stale skipped package build remain documented in artifacts/phase7/; corrected logs and final build integrity passed.
+- No Chapter 1 campaign transition, mission combat/rewards, SG-12, vending terminal, material migration or Doge City expansion added. Enemy/loot spawn definitions are future integration data.
+- Stop after Phase 7. Next is Phase 8 SG-12 discovery in Security Armory; sequential Chapter 1 mission logic follows in Phase 9.
+
+## 64. Phase 8 SG-12 Tactical Shotgun — 2026-10-05
+
+- SG-12 discovery and weapon implementation are complete. See [PHASE8_SG12.md](../docs/PHASE8_SG12.md).
+- Physical E pickup in Security Armory respects proximity/LOS and one-use ownership. No purchase/random reward or Chapter 0 rack added.
+- Secondary/Shells, 6-round magazine, 8 pellets at 18 damage each, 12m range, 0.8s interval, 3.2s reload, 1.2m stopping force, 45m noise radius and 0.92 mobility; balance remains configurable.
+- Screening preview uses M4X/VX-9 starting slots and an independently reset inventory. SG-12 acquisition fills Secondary; switching/revisiting never refills a used magazine. Preview starts with 18 spare shells.
+- Added reusable weapon session, swept first-impact collision/range, bounded stopping-force substeps and practice target reset with no XP/inventory rewards.
+- SG-12 uses a distinct procedural blast/tail/pump and mechanical cues with four fire variants through existing positional audio. Muted firing still emits gameplay noise.
+- Unit 42/42 and latest Browser SG-12/weapons/screening/smoke/map-desktop 5/5 passed. Initial collision/timing failures and corrected runs remain in artifacts/phase8/.
+- Windows package integrity verified against 29 runtime files plus Three.js module/core/package metadata. Actual native execution remains unverified due to the existing Application Control block.
+- No Chapter 1 campaign transition, mission encounter/rewards, vending/material migration or City Gate unlock added. Stop after Phase 8; next is Phase 9 sequential Chapter 1 mission logic.
+
+
+## 65. Phase 9 Chapter 1 Mission Logic — 2026-10-05
+
+- Completed sequentially with Browser checkpoints before implementing each next mission. See [PHASE9_CHAPTER1_MISSIONS.md](../docs/PHASE9_CHAPTER1_MISSIONS.md).
+- SILENT CHECKPOINT and PATIENT 34 evidence unlock the Isolation/Control routes. LOCKDOWN uses blackout, door release and 18 Walker/Runner encounters with authored navigation, perception, collision and one-use kill rewards. BLACK-7 is available after clearing and physically returning to Control.
+- THE LAST BUS adds abandoned evacuation records and an optional infected supply bus. Its ammo/medical/story reward is one-use; no grenade drops. Survivor radio changes the objective to ENTER DOGE CITY.
+- Final completion requires opening and physically crossing the gate into one threshold cell. Distant city scenery added; no city map expansion or substitute cutscene.
+- Chapter 0 extraction transfers HP, progression/Points/Status, money, materials, consumables, weapons/upgrades and per-weapon ammunition. M4X/VX-9 loadout and physical SG-12 discovery retain ownership and spent magazines. Standalone Chapter 1 and preview remain separate starts.
+- Status uses Points. Control Center physical E terminal uses money/materials for upgrades and purchases grenades only. Carried V/C/Q/G consumables work; no globally accessible Chapter 1 shop or weapon sales. Four-material migration remains undefined; legacy costs retained provisionally.
+- Unit 49/49 and latest Browser 7/7 passed. Includes real Chapter 0 extraction/transfer/replay and full Chapter 1 traversal, optional combat/rewards, Status/terminal, grenade/shield/pause and 800x600 rendering. A test snapshot sampling race was corrected; original logs preserved.
+- Windows package source integrity: 35 runtime files, Three.js module/core and metadata match source. Native execution remains unverified under the existing Application Control block; mock desktop checks validate renderer UI only.
+- Entry checkpoint supports retry/reload within the session, not permanent saves. Return to main or application restart begins a new session.
+- Stop after Phase 9. Next is Phase 10 Audio Pass.
+
+## 66. Phase 10 Audio Pass — 2026-10-05
+
+- Completed audio integration for Chapter 1, preview and existing Lab/Survival. See [PHASE10_AUDIO_PASS.md](../docs/PHASE10_AUDIO_PASS.md).
+- THREE.AudioListener at John height/position follows camera orientation; positional gun/creature/environment sources use world positions. AudioLoader reads 63 original reproducible WAV assets with immediate procedural fallback.
+- Four fire variants per weapon, bounded 0.97-1.03 playback rate, dry/equip and three simulated reload stages. Switch/reset cancels pending stages; pause/mute/report silence sources without advancing reload.
+- OUTDOOR, SMALL_ROOM, LARGE_ROOM, UNDERGROUND and WAREHOUSE profiles provide distinct reflections/ambient loops. Only the three existing map zone types are used in current gameplay; no new rooms or city expansion.
+- Added growl/attack/hit/death, doors, footsteps, wall/target impacts and power-down/alarm. Distance gating, occlusion gain/low-pass, 24-voice cap with weapon priority, loop fades and source cleanup keep the mix bounded. Ambient/footstep presentation does not add AI noise; existing muted shot noise/hearing radius unchanged.
+- Unit 54/54 and latest Browser 8/8 passed, including real Chapter 0 extraction/transfer/replay, full Chapter 1, SG-12, preview and renderer desktop checks. Component tests verify all five profiles, local loading, spatial/occluded cues, voice cap, reload cancellation and silence. Initial signed-zero assertion corrected; logs retained.
+- Windows package source integrity: 38 code files plus 64 audio files (63 WAV + manifest), Three.js module/core and metadata match. Native execution remains unverified due to existing Application Control. Procedural mix quality/spatial perception has not been certified through human listening.
+- No major visual polish or new gameplay systems added. Stop after Phase 10; next is Phase 11 Polish.

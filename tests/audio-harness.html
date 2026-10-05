@@ -1,0 +1,13 @@
+<!doctype html><html><head><script type="importmap">{"imports":{"three":"../node_modules/three/build/three.module.js"}}</script></head><body>
+<button id="unlock">Unlock</button><button id="fire">Fire</button><button id="dry">Dry</button><button id="reload">Reload</button><button id="cancel">Cancel</button><button id="pause">Pause</button><button id="mute">Mute</button><button id="left">Left growl</button><button id="right">Right attack</button><button id="cover">Covered death</button><button id="impact">Impact</button><button id="far">Far</button><button id="limit">Voice cap</button>
+<select id="zone"><option>OUTDOOR</option><option>SMALL_ROOM</option><option>LARGE_ROOM</option><option>UNDERGROUND</option><option>WAREHOUSE</option></select>
+<script type="module">
+import * as THREE from 'three';import {createAudioEngine} from '../audio-engine.js';import {createWeaponAudio} from '../weapon-audio.js';import {WEAPONS} from '../weapons.mjs';
+const scene=new THREE.Scene(),camera=new THREE.PerspectiveCamera(),player=new THREE.Object3D(),$=id=>document.getElementById(id);let muted=false,playing=true,zone='OUTDOOR',reload=0,wall=false,last=performance.now();
+scene.add(player);camera.position.set(0,28,23);camera.lookAt(0,0,0);
+const engine=createAudioEngine(camera,scene,()=>muted,()=>wall?[{x:2,z:0,w:.2,d:4}]:[]),weapon=createWeaponAudio(camera,player,()=>muted,{engine,getEnvironment:()=>zone});
+$('unlock').onclick=()=>engine.unlock();$('fire').onclick=()=>weapon.play('fire',WEAPONS.sg12);$('dry').onclick=()=>weapon.play('dry',WEAPONS.sg12);$('reload').onclick=()=>{reload=3.2;weapon.play('reload',WEAPONS.sg12,{reloadSeconds:3.2});};$('cancel').onclick=()=>{reload=0;weapon.play('equip',WEAPONS.vx9);};$('pause').onclick=()=>{playing=!playing;engine.setActive(playing);};$('mute').onclick=()=>{muted=!muted;engine.silence();if(!muted)engine.unlock();};$('zone').onchange=e=>zone=e.target.value;
+$('left').onclick=()=>{wall=false;engine.cue('growl',{x:-4,z:0});};$('right').onclick=()=>engine.cue('attack',{x:4,z:0},{type:'runner'});$('cover').onclick=()=>{wall=true;engine.cue('death',{x:4,z:0});};$('impact').onclick=()=>engine.cue('impact',{x:2,z:0});$('far').onclick=()=>engine.cue('growl',{x:80,z:0});$('limit').onclick=()=>{for(let i=0;i<50;i++)engine.cue('growl',{x:i%5-2,z:1});};
+function tick(now){const dt=Math.min(.05,(now-last)/1000);last=now;if(playing){reload=Math.max(0,reload-dt);weapon.syncReload(reload,WEAPONS.sg12);}engine.update(dt,{playing,position:player.position,environment:zone});scene.updateMatrixWorld(true);requestAnimationFrame(tick);}requestAnimationFrame(tick);
+Object.defineProperty(window,'audioFixture',{get:()=>({reload,engine:engine.snapshot(),weapon:weapon.snapshot()})});
+</script></body></html>

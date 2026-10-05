@@ -1,5 +1,7 @@
 # CURRENT PROJECT STATUS — DEAD ZONE: VIRUS X
 
+สถานะล่าสุด 5 ตุลาคม 2026: Phase 10 Audio Pass เสร็จ มี positional weapon/creature audio, WAV 63 ไฟล์, reload 3 จังหวะ, เสียงสะท้อน/ambient 5 profiles, indoor/outdoor zones, door/footstep/impact และ LOCKDOWN cues พร้อม pause/mute/cleanup ผ่าน Unit 54/54 และ Browser 8/8 ชุด Chapter 0 carry-over และ Chapter 1 ยังเล่นผ่าน Windows package เทียบ code 38 ไฟล์ + audio 64 ไฟล์ (รวม manifest), Three.js และ metadata ตรงกับ source แต่ native execution ยังไม่ยืนยันด้วย Application Control เดิม ดู [PHASE10_AUDIO_PASS.md](PHASE10_AUDIO_PASS.md) รายงานด้านล่างเป็น baseline จาก Phase 1 ขั้นถัดไป Phase 11 Polish
+
 วันที่ตรวจ: 5 ตุลาคม 2026 · เวอร์ชันเกม: 1.3.0 · ขอบเขต: Phase 1 — Audit Existing Project
 
 ## ผลการตรวจ

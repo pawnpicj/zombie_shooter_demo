@@ -1,5 +1,6 @@
 import * as THREE from 'three';
-import {WEAPONS,GRENADES,createInventory,rewardKill,upgradeCost,upgradeWeapon,buyGrenade,lootBox,collectLabWeapon,weaponStats,useSpeed,useShield,absorbDamage,takeReload,useGrenade} from './economy.mjs';
+import {equipWeapon,activeWeapons,magazine,consumeRound,tickWeapons,refillMagazine,spreadAngle,AMMO_NAMES} from './weapons.mjs';
+import {WEAPONS,GRENADES,createInventory,rewardKill,upgradeCost,upgradeWeapon,buyGrenade,lootBox,collectLabWeapon,weaponStats,useSpeed,useShield,absorbDamage,useGrenade} from './economy.mjs';
 const $=id=>document.getElementById(id);
 export function initSupplies(api){
   let bag=createInventory(),returnState='playing',throwCooldown=0;
@@ -37,12 +38,12 @@ export function initSupplies(api){
     bag=createInventory();throwCooldown=0;clearEffects();restock();$('shopOverlay').hidden=true;
   }
   for(const [kind,x,z] of [['materials',-5,18],['random',5,18],['ammo',0,14],['materials',-18,10],['materials',18,10],['random',-18,-8],['random',18,-8],['ammo',0,-10]])addCrate(kind,x,z);
-  for(const [weapon,x,z] of [['smg',-18,0],['shotgun',18,0],['marksman',0,-18]])addCrate('weapon',x,z,weapon);
+  for(const [weapon,x,z] of [['smg',-18,0],['shotgun',18,0],['marksman',0,-18],['vx9',-5,12],['m4x',5,12]])addCrate('weapon',x,z,weapon);
   function interactionTargets(){return crates.map((c,index)=>({id:'crate-'+index,action:c.weapon?'เก็บ '+WEAPONS[c.weapon].name:'เปิด '+names[c.kind],position:c.mesh.position,distance:2.2,available:c.active,activate:()=>collectCrate(c)}));}
   function collectCrate(c){
     if(api.getState()!=='playing'||!c.active||Math.hypot(c.mesh.position.x-api.player.position.x,c.mesh.position.z-api.player.position.z)>=2.2)return false;
     if(c.weapon){
-      collectLabWeapon(bag,c.weapon);bag.equipped=c.weapon;api.cancelReload();api.notice('LAB WEAPON / '+WEAPONS[c.weapon].name);
+      collectLabWeapon(bag,c.weapon);equipWeapon(bag,c.weapon);api.cancelReload();api.weaponSound?.('equip',WEAPONS[c.weapon]);api.notice('LAB WEAPON / '+WEAPONS[c.weapon].name);
     }else{
       const reward=lootBox(bag,c.kind);api.notice('+'+reward.amount+' / '+names[reward.kind]);
     }
@@ -55,8 +56,9 @@ export function initSupplies(api){
     for(const key of bag.weapons){
       const gun=WEAPONS[key],cost=upgradeCost(bag,key),row=document.createElement('div');row.className='shop-row';
       row.innerHTML='<div><b>'+gun.name+' <small>Level '+(bag.upgrades[key]+1)+'</small></b><p>พลังโจมตี +15% ต่อ Level · $ '+cost.money+' + '+cost.materials+' วัสดุ</p></div><div class="shop-actions"><button class="equip"></button><button class="upgrade">อัปเกรด</button></div>';
-      const equip=row.querySelector('.equip');equip.textContent=bag.equipped===key?'ใช้อยู่':'ใช้ปืนนี้';equip.disabled=bag.equipped===key;
-      equip.onclick=()=>{bag.equipped=key;api.cancelReload();renderShop();updateHud();};
+      const equip=row.querySelector('.equip');equip.textContent=bag.equipped===key?'ใช้อยู่':'ใส่ช่อง '+gun.slot;equip.disabled=bag.equipped===key;
+      equip.title='แทนปืนในช่อง '+gun.slot+' โดยเก็บปืนเดิมและอัปเกรดไว้';
+      equip.onclick=()=>{equipWeapon(bag,key);api.cancelReload();api.weaponSound?.('equip',WEAPONS[key]);renderShop();updateHud();};
       const upgrade=row.querySelector('.upgrade');upgrade.disabled=bag.money<cost.money||bag.materials<cost.materials;
       upgrade.onclick=()=>{if(upgradeWeapon(bag,key)){api.tone(700,.08,.04,'sine');renderShop();updateHud();}};
       $('weaponRows').appendChild(row);
@@ -80,7 +82,7 @@ export function initSupplies(api){
   }
   $('openShop').onclick=openShop;$('closeShop').onclick=closeShop;
   function cycleGrenade(){const keys=Object.keys(GRENADES);bag.selectedGrenade=keys[(keys.indexOf(bag.selectedGrenade)+1)%keys.length];updateHud();}
-  function cycleWeapon(){if(bag.weapons.length<2)return;bag.equipped=bag.weapons[(bag.weapons.indexOf(bag.equipped)+1)%bag.weapons.length];api.cancelReload();api.notice(WEAPONS[bag.equipped].name);}
+  function cycleWeapon(){const keys=activeWeapons(bag);if(keys.length<2)return;equipWeapon(bag,keys[(keys.indexOf(bag.equipped)+1)%keys.length]);api.cancelReload();api.weaponSound?.('equip',WEAPONS[bag.equipped]);api.notice(WEAPONS[bag.equipped].name);}
   function ring(x,z,radius,color,duration,kind,damage=0){
     const mesh=new THREE.Mesh(new THREE.RingGeometry(.1,radius,36),new THREE.MeshBasicMaterial({color,side:THREE.DoubleSide,transparent:true,opacity:.55,depthWrite:false}));
     mesh.rotation.x=-Math.PI/2;mesh.position.set(x,.08,z);api.scene.add(mesh);
@@ -111,13 +113,14 @@ export function initSupplies(api){
   }
   function updateHud(){
     $('moneyValue').textContent='$ '+bag.money;$('materialValue').textContent='วัสดุ '+bag.materials;
-    $('reserveAmmo').textContent=bag.reserve;shieldAura.visible=bag.shield>0;
+    $('reserveAmmo').textContent=bag.reserve+' '+AMMO_NAMES[WEAPONS[bag.equipped].ammoType];$('magazineSize').textContent=WEAPONS[bag.equipped].magazineSize;shieldAura.visible=bag.shield>0;
     $('itemCounts').textContent='ยาวิ่ง '+bag.speedPotions+' [V] · โล่ '+bag.shieldCells+' [C]'+(bag.shield>0?' · Shield '+Math.ceil(bag.shield):'')+(bag.speedTimer>0?' · วิ่ง '+Math.ceil(bag.speedTimer)+'s':'');
     const grenade=GRENADES[bag.selectedGrenade];$('grenadeCounts').textContent=grenade.name+' ×'+bag.grenades[bag.selectedGrenade]+' · Q เปลี่ยน / G ขว้าง';
     $('openShop').disabled=!['playing','paused'].includes(api.getState());
     // The shared interaction selector in game.js owns both E prompts.
   }
   function tick(dt){
+    tickWeapons(bag,dt);
     bag.speedTimer=Math.max(0,bag.speedTimer-dt);throwCooldown=Math.max(0,throwCooldown-dt);
     for(const c of crates){if(!c.active&&Number.isFinite(c.cooldown)){c.cooldown-=dt;if(c.cooldown<=0){c.active=true;c.mesh.visible=true;}}}
     for(let i=effects.length-1;i>=0;i--){
@@ -151,9 +154,13 @@ export function initSupplies(api){
     drop(position){if(Math.random()<.16)addCrate('random',position.x,position.z,null,true);},
     modifyStats(base){return weaponStats(base,bag);},
     absorbDamage(damage){return absorbDamage(bag,damage);},
-    reload(missing){return takeReload(bag,missing);},
+    ammo(){return magazine(bag);},
+    definition(){return WEAPONS[bag.equipped];},
+    fire(interval){return consumeRound(bag,interval);},
+    spread(pellet){return spreadAngle(bag,pellet);},
+    reload(){return refillMagazine(bag);},
     canReload(){return bag.reserve>0;},
     weaponLabel(){return WEAPONS[bag.equipped].name+' / LEVEL '+(bag.upgrades[bag.equipped]+1);},
-    snapshot(){return {...bag,weapons:[...bag.weapons],upgrades:{...bag.upgrades},grenades:{...bag.grenades},crates:crates.filter(c=>c.active).map(c=>({kind:c.kind,weapon:c.weapon,x:c.mesh.position.x,z:c.mesh.position.z})),effects:effects.map(e=>({kind:e.kind,life:e.life,x:e.mesh.position.x,z:e.mesh.position.z}))};}
+    snapshot(){return {...bag,weapons:[...bag.weapons],magazines:{...bag.magazines},reserves:{...bag.reserves},loadout:{...bag.loadout},recoil:{...bag.recoil},upgrades:{...bag.upgrades},grenades:{...bag.grenades},crates:crates.filter(c=>c.active).map(c=>({kind:c.kind,weapon:c.weapon,x:c.mesh.position.x,z:c.mesh.position.z})),effects:effects.map(e=>({kind:e.kind,life:e.life,x:e.mesh.position.x,z:e.mesh.position.z}))};}
   };
 }

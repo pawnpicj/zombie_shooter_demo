@@ -9,9 +9,17 @@
     "test:desktop": "electron . --self-test",
     "build:windows": "electron-packager . DeadZone --platform=win32 --arch=x64 --out=dist --overwrite --asar --ignore=artifacts --ignore=tests --ignore=dist",
     "test:core": "node tests/browser-core.mjs",
+    "test:weapons": "node tests/browser-weapons.mjs",
+    "test:enemies": "node tests/browser-enemies.mjs",
+    "test:map": "node tests/browser-map.mjs",
+    "test:screening": "node tests/browser-screening.mjs",
+    "test:sg12": "node tests/browser-sg12.mjs",
     "test:campaign": "node tests/browser-campaign.mjs",
     "test:level": "node tests/browser-level.mjs",
-    "test:supplies": "node tests/browser-supplies.mjs"
+    "test:supplies": "node tests/browser-supplies.mjs",
+    "test:chapter1": "node tests/browser-chapter-one.mjs",
+    "test:audio": "node tests/browser-audio.mjs",
+    "audio:generate": "node tools/generate-audio.mjs"
   },
   "dependencies": {
     "three": "0.180.0"

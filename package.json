@@ -1,0 +1,26 @@
+{
+  "name": "dead-zone-threejs",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node server.mjs",
+    "test": "node --test tests/*.test.mjs",
+    "desktop": "electron .",
+    "test:desktop": "electron . --self-test",
+    "build:windows": "electron-packager . DeadZone --platform=win32 --arch=x64 --out=dist --overwrite --asar --ignore=artifacts --ignore=tests --ignore=dist",
+    "test:core": "node tests/browser-core.mjs",
+    "test:campaign": "node tests/browser-campaign.mjs",
+    "test:level": "node tests/browser-level.mjs",
+    "test:supplies": "node tests/browser-supplies.mjs"
+  },
+  "dependencies": {
+    "three": "0.180.0"
+  },
+  "version": "1.3.0",
+  "description": "Virus X story campaign starring John Valentine, built with Three.js",
+  "main": "electron-main.cjs",
+  "devDependencies": {
+    "@electron/packager": "20.3.0",
+    "electron": "44.5.1"
+  }
+}

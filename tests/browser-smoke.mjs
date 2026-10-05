@@ -1,0 +1,37 @@
+import { createRequire } from 'node:module';
+import assert from 'node:assert/strict';
+import { mkdir } from 'node:fs/promises';
+const require=createRequire(import.meta.url);
+const puppeteer=require(process.env.PUPPETEER_MODULE || 'puppeteer');
+const browser=await puppeteer.launch({headless:true,executablePath:process.env.CHROME_PATH,args:['--use-angle=swiftshader','--enable-unsafe-swiftshader'],defaultViewport:{width:1440,height:900}});
+const page=await browser.newPage(), errors=[];
+page.on('pageerror',e=>errors.push(e.message));
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+try {
+  await page.goto('http://127.0.0.1:5173',{waitUntil:'networkidle0'});
+  await page.waitForFunction(()=>window.zombieShooter?.state==='ready');
+  await mkdir(new URL('../artifacts/',import.meta.url),{recursive:true});
+  await page.screenshot({path:new URL('../artifacts/title.png',import.meta.url).pathname.replace(/^\/(\w:)/,'$1')});
+  await page.select('#gameMode','survival');await page.click('#start');
+  assert.equal((await page.evaluate(()=>window.zombieShooter)).state,'playing');
+  await page.keyboard.down('d');await page.waitForFunction(()=>window.zombieShooter.player.x>1,{timeout:15000});await page.keyboard.up('d');
+  const moved=await page.evaluate(()=>window.zombieShooter);
+  assert.ok(moved.player.x>1,'WASD should move player');
+  await page.keyboard.down('Space');await sleep(150);await page.keyboard.up('Space');
+  await page.mouse.move(720,270);await page.mouse.down();await page.waitForFunction(()=>window.zombieShooter.ammo<30,{timeout:15000});await page.mouse.up();
+  assert.ok((await page.evaluate(()=>window.zombieShooter)).ammo<30,'Click should fire');
+  await page.keyboard.press('r');await page.waitForFunction(()=>window.zombieShooter.reloadTimer===0 && window.zombieShooter.ammo===30,{timeout:15000});
+  assert.equal((await page.evaluate(()=>window.zombieShooter)).ammo,30,'Reload should refill');
+  await page.keyboard.press('Escape');
+  const paused=await page.evaluate(()=>window.zombieShooter);
+  await sleep(700);
+  assert.deepEqual(await page.evaluate(()=>window.zombieShooter),paused,'Pause should freeze gameplay');
+  await page.keyboard.press('Escape');
+  await page.waitForFunction(()=>window.zombieShooter.zombies>=5,{timeout:20000});
+  assert.ok((await page.evaluate(()=>window.zombieShooter)).zombies>0,'Wave should spawn enemies');
+  await page.screenshot({path:new URL('../artifacts/gameplay.png',import.meta.url).pathname.replace(/^\/(\w:)/,'$1')});
+  await page.click('#mute');
+  assert.match(await page.$eval('#mute',e=>e.textContent),/ปิด/);
+  console.log('Browser smoke checks passed',await page.evaluate(()=>window.zombieShooter));
+  assert.deepEqual(errors,[],'No runtime errors');
+} finally {await browser.close();}
